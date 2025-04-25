@@ -1,16 +1,23 @@
+import java.util.Queue;
 import java.util.Random;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.lang.reflect.Array;
+
+import enigma.core.Enigma;
+import java.util.Arrays;
 
 public class InputQueue {
     Random rand = new Random();
     private int randVal;
     private CircularQueue queue = new CircularQueue(16);//15 değil 16 olmasının sebebi çıkartmadan önce ekleme yapmamız
-
     InputQueue() {//başlangıçta queueyi random elementlerle dolduruyoruz
         for (int i = 0; i < 15; i++) {
             addElement();
         }
 
     }
+    
 
     void addElement() {//1 ile 100 arası sayı belirleyip olasılıklara göre değerleri atıyoruz
         randVal = rand.nextInt(100) + 1;
@@ -32,6 +39,7 @@ public class InputQueue {
 
     }
 
+     
     String writeElements() {
         Object current;//itemleri string değere dönüştürüyor yazdırmak için
         String queueitems = "";
@@ -39,8 +47,25 @@ public class InputQueue {
             current = queue.dequeue();
             queueitems += current.toString();
             queue.enqueue(current);
+
         }
+        
         return queueitems;
 
+    }
+    String writeElementsRANDOM()
+    {
+        Object current;//itemleri string değere dönüştürüyor yazdırmak için
+        String queueitems = "";
+        for (int i=0;i<16;i++)
+        {
+        
+
+
+        }
+
+
+    
+    return queueitems;
     }
 }

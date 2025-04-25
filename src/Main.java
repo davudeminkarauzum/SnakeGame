@@ -14,24 +14,8 @@ import java.io.Reader;
 
 
 public class Main {
-    public static void main(String[] args) {
-      enigma.console.Console cn = Enigma.getConsole("Snake Game");
-        
-        try {
-        	BufferedReader reader = new BufferedReader(new FileReader("maze.txt"));
-        	String s = reader.readLine();
-        	while(!s.equals(" ")) {
-        		System.out.println(s);
-        		s = reader.readLine();
-        	}
-        	reader.close();
-        } catch(IOException e) {
-        	e.printStackTrace();
-        }
-        
-        cn.getTextWindow().setCursorPosition(58, 2);
-        InputQueue inputQueue=new InputQueue();
-        cn.getTextWindow().output(inputQueue.writeElements());
-
+    public static void main(String[] args) throws Exception {
+     Game game=new Game();
+   
     }
 }
