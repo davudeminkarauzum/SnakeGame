@@ -3,7 +3,7 @@ import java.util.Random;
 public class InputQueue {
     Random rand = new Random();
     private int randVal;
-    private CircularQueue queue = new CircularQueue(16);//15 değil 16 olmasının sebebi çıkartmadan önce ekleme yapmamız
+    private CircularQueue queue = new CircularQueue(15);
 
     InputQueue() {//başlangıçta queueyi random elementlerle dolduruyoruz
         for (int i = 0; i < 15; i++) {
@@ -26,16 +26,17 @@ public class InputQueue {
             queue.enqueue("S");
     }
 
-    Object dequeueInput() {//önce yeni bir element ekliyoruz ardından en öndekini çekiyoruz
+    Object dequeueInput() { // önce elementi çekiyoruz sonra element ekliyoruz. böyle yaparsak inputQueue'yu 16 boyutluk açmamıza gerek kalmaz
+    	
+    	Object a = queue.dequeue();
         addElement();
-        return queue.dequeue();
-
+        return a;      
     }
 
     String writeElements() {
         Object current;//itemleri string değere dönüştürüyor yazdırmak için
         String queueitems = "";
-        for (int i = 0; i < 16; i++) {
+       for (int i = 0; i < 15; i++) { // ekrana 15 eleman yazdırmalıyız
             current = queue.dequeue();
             queueitems += current.toString();
             queue.enqueue(current);
