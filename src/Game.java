@@ -66,7 +66,8 @@ public class Game {
         while(isAlive)
         {
 
-            
+           gameField.unloadInputQueue();
+
             cn.getTextWindow().addKeyListener(klis);
            
              // ----------------------------------------------------
