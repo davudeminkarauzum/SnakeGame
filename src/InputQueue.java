@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class InputQueue {
     Random rand = new Random();
     private int randVal;
-    private CircularQueue queue = new CircularQueue(16);//15 değil 16 olmasının sebebi çıkartmadan önce ekleme yapmamız
+    private CircularQueue queue = new CircularQueue(15);//15 değil 16 olmasının sebebi çıkartmadan önce ekleme yapmamız
     InputQueue() {//başlangıçta queueyi random elementlerle dolduruyoruz
         for (int i = 0; i < 15; i++) {
             addElement();
@@ -34,8 +34,9 @@ public class InputQueue {
     }
 
     Object dequeueInput() {//önce yeni bir element ekliyoruz ardından en öndekini çekiyoruz
+        Object inp=queue.dequeue();
         addElement();
-        return queue.dequeue();
+        return inp;
 
     }
 
@@ -53,19 +54,5 @@ public class InputQueue {
         return queueitems;
 
     }
-    String writeElementsRANDOM()
-    {
-        Object current;//itemleri string değere dönüştürüyor yazdırmak için
-        String queueitems = "";
-        for (int i=0;i<16;i++)
-        {
-        
 
-
-        }
-
-
-    
-    return queueitems;
-    }
 }

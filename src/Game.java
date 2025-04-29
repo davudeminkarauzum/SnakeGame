@@ -22,6 +22,13 @@ public class Game {
     public int keypr;   // key pressed?
     public int rkey;    // key   (for press/release)
 
+    public void clearscreen(){
+        for (int i=0;i<80;i++){
+            for (int z=0;z<30;z++){
+                cn.getTextWindow().output(i, z, ' ');
+            }
+        }
+    }
    
     public Game()throws Exception
     {
@@ -67,7 +74,9 @@ public class Game {
              
              cn.getTextWindow().output(px,py,'P');
              while(true) {
+
                 long currentTime = System.currentTimeMillis();
+
                 if (currentTime - lastTime >= timeUnit) {
                 if (keypr == 1) {
                     if (rkey == KeyEvent.VK_LEFT && !gameField.isWall(px - 1, py)) {
@@ -100,30 +109,8 @@ public class Game {
                 }
                 Thread.sleep(20);
              }
-
         }
-
-
-    }
-    
-
-    
-}
-public void clearscreen()
-{
-for (int i=0;i<80;i++)
-{
-    for (int z=0;z<30;z++)
-    {
-        cn.getTextWindow().output(i, z, ' ');
-
-
     }
 }
-
-
-}
-
-    
 }
 
