@@ -43,6 +43,36 @@ public class GameField {
     public boolean isWall(int x, int y) {
         return map[y][x] == '#';
     }
+    public void addRandomInputQueue() {
+        Random random = new Random();
+             boolean isInserted = false;
+
+            while(!isInserted) {
+
+                int x = random.nextInt(23);
+                int y = random.nextInt(55); // rastgele koordinat belirlenmesi
+
+                if(map[x][y] == ' ') { // koordinat boşsa
+
+                    Object next = inputQueue.dequeueInput();
+                    char c = next.toString().charAt(0);
+
+                    cn.getTextWindow().setCursorPosition(y, x);
+                    cn.getTextWindow().output(c);  // o koordinata inputQueue elemanını yazdır
+
+                    map[x][y] = c; // elementleri bir daha aynı yere eklememek için mazeMap'i de güncellemeliyiz
+
+                    isInserted = true; // element başarıyla yerleşti
+
+                    cn.getTextWindow().setCursorPosition(58, 2);
+                    cn.getTextWindow().output("                 "); // Queue üst üste yazılmasın diye önce boşluk koy
+                    cn.getTextWindow().setCursorPosition(58, 2);
+                    cn.getTextWindow().output(inputQueue.writeElements()); // Queue'yu tekrar yazdır
+                }
+            }
+        }
+
+
 
     public void unloadInputQueue() {
 	 

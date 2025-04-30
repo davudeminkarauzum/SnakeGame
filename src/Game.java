@@ -21,6 +21,7 @@ public class Game {
  
     public int keypr;   // key pressed?
     public int rkey;    // key   (for press/release)
+    public int timeCount=0;
 
     public void clearscreen(){
         for (int i=0;i<80;i++){
@@ -79,6 +80,10 @@ public class Game {
                 long currentTime = System.currentTimeMillis();
 
                 if (currentTime - lastTime >= timeUnit) {
+                    timeCount++;//100ms de bir counter yanı zaman birimi artıyor 10*100ms yani 1 snde bir de kuyruktan ekliyor
+                    if(timeCount%10==0){
+                        gameField.addRandomInputQueue();
+                    }
                 if (keypr == 1) {
                     if (rkey == KeyEvent.VK_LEFT && !gameField.isWall(px - 1, py)) {
                         cn.getTextWindow().output(px, py, ' ');
@@ -100,6 +105,7 @@ public class Game {
                         py++;
                         cn.getTextWindow().output(px, py, 'P');
                     }
+
                 
                 
                     keypr = 0;
