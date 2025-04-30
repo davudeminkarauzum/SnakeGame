@@ -4,7 +4,7 @@ public class Stack {
 	public int top;
 	public Object elements[];
 	
-	Stack(int size) 
+	Stack(int size) {
 		top = -1;
 		elements = new Object[size];
 	}
