@@ -9,7 +9,6 @@ public class InputQueue {
         for (int i = 0; i < 15; i++) {
             addElement();
         }
-
     }
 
     void addElement() {//1 ile 100 arası sayı belirleyip olasılıklara göre değerleri atıyoruz
@@ -39,6 +38,11 @@ public class InputQueue {
        for (int i = 0; i < 15; i++) { // ekrana 15 eleman yazdırmalıyız
             current = queue.dequeue();
             queueitems += current.toString();
+            
+         // current öğesini char'a dönüştürüp haritaya yazıyoruz
+            char c = current.toString().charAt(0);  
+            GameField.map[2][58 + i] = c;  
+            
             queue.enqueue(current);
         }
         return queueitems;
