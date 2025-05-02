@@ -31,8 +31,8 @@ public class Game {
     
     // oyundaki skor değerleri
     int time = 0;   
-    int energy = 0;  
-    int life = 0;
+    int energy = 500;  
+    int life = 1000;
     int trap = 0;
     int playerscore = 0;    
     int sRobot = 0;
