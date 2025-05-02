@@ -189,6 +189,38 @@ public class Game {
                     	collectTreasures(px + 1, py);
                     	movePlayer(px + 1, py);
                     }
+
+                    if(rkey == KeyEvent.VK_SPACE) {                    	                                       	
+                    	if(trap > 0) {
+                    		
+                    	trap--;                      	
+                    	int randomx;
+                    	int randomy;
+                    	                    	
+                    	do {                  		
+                    		randomx = 0;
+                    		randomy = 0;
+                    		
+                    		int randommove = random.nextInt(4);
+                    		
+                    		switch(randommove) {
+                    		
+                    		case(0): { randomx = -1; break; }
+                    		case(1): { randomx = 1; break; }
+                    		case(2): { randomy = -1; break; }
+                    		case(3): { randomy = 1; break; }                     		
+                    		}                  	                    	
+                    	}while(gameField.isWall(px + randomx, py + randomy));
+                                       	
+                    	int oldPx = px;
+                    	int oldPy = py;
+
+                        energy -= 1;
+                    	collectTreasures(px + randomx, py + randomy);
+                    	movePlayer(px + randomx, py + randomy);
+                    	GameField.map[oldPx][oldPy] = '=';                    	                	                   	                  	                	
+                    	}                    	
+                    }
                     
                     updateGameBoard();  
                    
