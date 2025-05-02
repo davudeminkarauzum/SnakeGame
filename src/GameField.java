@@ -6,7 +6,7 @@ import java.util.Random;
 
 import enigma.core.Enigma;
 
-public class GameField {
+public class GameField { //deneme
 
     InputQueue inputQueue = new InputQueue();
 
