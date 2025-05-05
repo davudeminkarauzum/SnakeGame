@@ -35,43 +35,18 @@ public class GameField { //deneme
         }    
 
     }
-    
-    
-    public static void loadMapToText() {  // önce map arrayini ekran.txt'e atarız
-    	
-    	try {
-            FileWriter writer = new FileWriter("ekran.txt", false);
 
-            for (int i = 0; i < map.length; i++) {
-                for (int j = 0; j < map[i].length; j++) {
-                    writer.write(map[i][j]);
-                }
-                writer.write("\n");
-            }
-            writer.close();
-           
-        } catch (IOException e) {
-        	e.printStackTrace();
-        }    	    	  	
-    }
- 
-     public static void loadTextToScreen() {  // sonra ekran.txt'i yazdırırız.	
-    	
-    	 try {
-             BufferedReader reader = new BufferedReader(new FileReader("ekran.txt"));
-             String s;
-
-             while ((s = reader.readLine()) != null) {
-                 System.out.println(s);
-             }
-             reader.close();
-         } catch (IOException e) {
-         	e.printStackTrace();
-
-         }
-    }
-    
-         
+      public static void printScreen() {
+    	 
+    	 for(int i = 0; i < 23; i++) {    		 
+    		 for(int j = 0; j < 80; j++) {     		 
+        		 System.out.print(map[i][j]);
+        		         		 
+        	 } 
+    		  System.out.println("");
+    	 }   	 
+     }
+             
     public boolean isWall(int x, int y) {
         return map[x][y] == '#';
     }  
