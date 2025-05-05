@@ -1,16 +1,12 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Scanner;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import enigma.event.TextMouseEvent;
-import enigma.event.TextMouseListener;
 import enigma.core.Enigma;
+import java.util.Random;
 
 public class Game {
     String choice;
-    enigma.console.Console cn = Enigma.getConsole("Snake Game",80,30);
+    static enigma.console.Console cn = Enigma.getConsole("Snake Game",80,30);
     
     private Scanner scanner;
     
@@ -38,8 +34,8 @@ public class Game {
     int sRobot = 0;
     int computerscore = 0;
     
-    // Oyuncunun ilk pozisyonu
-    int px=5, py=5;
+    //Coordinates of player and computer
+    int px = 0, py = 0, cx = 0, cy = 0 ;
        
     void updateStatusPanel() { // skor değerlerinin güncellenip ekrana yazdırılması
     	
@@ -114,12 +110,12 @@ public class Game {
     {
         
     scanner = new Scanner(System.in);
-    klis=new KeyListener() {
+    klis = new KeyListener() {
         public void keyTyped(KeyEvent e) {}
         public void keyPressed(KeyEvent e) {
-            if(keypr==0) {
-                keypr=1;
-                rkey=e.getKeyCode();
+            if(keypr == 0) {
+                keypr = 1;
+                rkey = e.getKeyCode();
             }
         }
         public void keyReleased(KeyEvent e) {}
@@ -143,20 +139,30 @@ public class Game {
         
     cn.getTextWindow().setCursorPosition(50, 3);
     choice = scanner.nextLine();
+    
+    Random rnd = new Random();
 
     if(choice.equals("1"))
     {
         clearscreen();
         GameField gameField= new GameField(cn);
+        
+        while(!(GameField.map[py][px] == ' ' && GameField.map[cy][cx] == ' ')) {
+        	if(GameField.map[py][px] != ' ') {
+            	px = rnd.nextInt(1,55);
+            	py = rnd.nextInt(1,22);
+        	}
+        	if(GameField.map[cy][cx] != ' ') {
+            	cx = rnd.nextInt(1,55);
+            	cy = rnd.nextInt(1,22);
+        	}
+        }
+        cn.getTextWindow().output(px , py, 'P');   cn.getTextWindow().output(cx , cy, 'C'); 
+        
         while(isAlive)
         {
-
             cn.getTextWindow().addKeyListener(klis);
-           
-             // ----------------------------------------------------
-                                     
-             GameField.map[px][py] = 'P';
-             
+            
              for(int i = 0; i < 30; i++) // oyunun başında tahtaya input queue'dan 30 element boşalt
                 gameField.unloadInputQueue();
              
@@ -189,43 +195,35 @@ public class Game {
                     	collectTreasures(px + 1, py);
                     	movePlayer(px + 1, py);
                     }
-
-                    if(rkey == KeyEvent.VK_SPACE) {                    	                                       	
-                    	if(trap > 0) {
-                    		
-                    	trap--;                      	
-                    	int randomx;
-                    	int randomy;
-                    	                    	
-                    	do {                  		
-                    		randomx = 0;
-                    		randomy = 0;
-                    		
-                    		int randommove = random.nextInt(4);
-                    		
-                    		switch(randommove) {
-                    		
-                    		case(0): { randomx = -1; break; }
-                    		case(1): { randomx = 1; break; }
-                    		case(2): { randomy = -1; break; }
-                    		case(3): { randomy = 1; break; }                     		
-                    		}                  	                    	
-                    	}while(gameField.isWall(px + randomx, py + randomy));
-                                       	
-                    	int oldPx = px;
-                    	int oldPy = py;
-
-                        energy -= 1;
-                    	collectTreasures(px + randomx, py + randomy);
-                    	movePlayer(px + randomx, py + randomy);
-                    	GameField.map[oldPx][oldPy] = '=';                    	                	                   	                  	                	
-                    	}                    	
-                    }
                     
                     updateGameBoard();  
                    
-                    keypr = 0;                   
+                    keypr = 0;    
                 } 
+                Stack pathfinding = findPath(cx,cy);
+                
+                while(!pathfinding.isEmpty()) {
+               	 
+               	 String way = (String) pathfinding.peek();
+                 	 if(way.equals("R")) {
+                		 cn.getTextWindow().output(cx, cy, ' ');
+                		 cx++;
+                		 cn.getTextWindow().output(cx, cy, 'C');
+                	 } else if(way.equals("D")) {
+                		 cn.getTextWindow().output(cx, cy, ' ');
+                		 cy++;
+                		 cn.getTextWindow().output(cx, cy, 'C');
+                	 } else if(way.equals("L")) {
+                		 cn.getTextWindow().output(cx, cy, ' ');
+                		 cx--;
+                		 cn.getTextWindow().output(cx, cy, 'C');
+                	 } else if(way.equals("U")) {
+                		 cn.getTextWindow().output(cx, cy, ' ');
+                		 cy--;
+                		 cn.getTextWindow().output(cx, cy, 'C');
+                	 }
+                 	 pathfinding.pop();
+                }
                 lastTime = currentTime;                
                }
                           
@@ -246,4 +244,80 @@ public class Game {
         }
      }
   }
+    public static Stack findPath(int cx, int cy) {
+
+        Random rnd = new Random();
+        int targetedX = 0, targetedY = 0;
+        
+        while (!(GameField.map[targetedY][targetedX] == '1' || 
+                 GameField.map[targetedY][targetedX] == '2' || 
+                 GameField.map[targetedY][targetedX] == '3' || 
+                 GameField.map[targetedY][targetedX] == '@' || 
+                 GameField.map[targetedY][targetedX] == 'S')) {
+            targetedX = rnd.nextInt(1, 55);
+            targetedY = rnd.nextInt(1, 22); 
+        }
+
+        int rows = 22, cols = 55;
+        boolean[][] visited = new boolean[rows][cols];
+        int[][][] parent = new int[rows][cols][2]; 
+
+        Stack stack = new Stack(500);
+        stack.push(new int[]{cx, cy});
+
+        int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}; // right, down, left, up
+
+        while (!stack.isEmpty()) {
+            int[] current = (int[]) stack.pop();
+            int x = current[0], y = current[1];
+
+            if (x < 0 || y < 0 || x >= rows || y >= cols || visited[y][x] || GameField.map[y][x] == '#')
+                continue;
+
+            visited[x][y] = true;
+
+            if (x == targetedX && y == targetedY) {
+                Stack result = new Stack(500);
+                
+                while (!(targetedX == cx && targetedY == cy)) {
+                    int tempX = parent[targetedY][targetedX][0];
+                    int tempY = parent[targetedY][targetedX][1];
+
+                    if (targetedX - tempX == 0 && targetedY - tempY == 1) {
+                        result.push("D"); // Down
+                    } else if (targetedX - tempX == 0 && targetedY - tempY == -1) {
+                        result.push("U"); // Up
+                    } else if (targetedX - tempX == 1 && targetedY - tempY == 0) {
+                        result.push("R"); // Right
+                    } else if (targetedX - tempX == -1 && targetedY - tempY == 0) {
+                        result.push("L"); // Left
+                    }
+                    
+                    if (!(tempX == cx && tempY == cy)) { 
+                    	cn.getTextWindow().output(cx, cy, ' ');
+                        GameField.map[tempY][tempX] = '.';
+                    }
+                    
+                    targetedX = tempX;
+                    targetedY = tempY;
+                }
+                return result;
+            }
+
+            for (int i = 0; i < 4; i++) {
+                int nx = x + directions[i][0];
+                int ny = y + directions[i][1];
+
+                if (nx >= 0 && ny >= 0 && nx < rows && ny < cols && !visited[ny][nx] && GameField.map[ny][nx] != ' ') {
+                    visited[ny][nx] = true;
+                    stack.push(new int[]{nx, ny});
+                    parent[ny][nx][0] = x;
+                    parent[ny][ny][1] = y;
+                }
+            }
+        }
+
+        return new Stack(500);
+    }
+
 }
