@@ -100,14 +100,12 @@ public class Game {
         GameField.map[px][py] = 'P';
     }
        
-    void updateGameBoard() { // tahtayı güncelleyen fonksiyon
+   void updateGameBoard() { // tahtayı güncelleyen fonksiyon
     	
-    	updateStatusPanel(); // değerlerin güncellenmesi
-        GameField.loadMapToText(); // oyun haritasının text'e aktarılması
+    	updateStatusPanel(); // değerlerin güncellenmesi       
         clearscreen();   // ekranın temizlenmesi
         cn.getTextWindow().setCursorPosition(0, 0); // cursoru ayarla
-        GameField.loadTextToScreen(); // text'i ekrana yazdır.
-    	
+        GameField.printScreen();    	
     }
        
     public Game()throws Exception
