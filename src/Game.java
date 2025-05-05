@@ -13,6 +13,7 @@ public class Game {
     enigma.console.Console cn = Enigma.getConsole("Snake Game",80,30);
     
     private Scanner scanner;
+    Random random = new Random();
     
     boolean isAlive = true;
     
