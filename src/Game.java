@@ -10,7 +10,7 @@ import enigma.core.Enigma;
 
 public class Game {
     String choice;
-    enigma.console.Console cn = Enigma.getConsole("Snake Game",80,30);
+    enigma.console.Console cn = Enigma.getConsole("Snake Game",80,15);
     
     private Scanner scanner;
     Random random = new Random();
