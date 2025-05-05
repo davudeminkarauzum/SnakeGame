@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.Random;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import enigma.event.TextMouseEvent;
