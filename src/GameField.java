@@ -6,6 +6,9 @@ import java.util.Random;
 
 import enigma.core.Enigma;
 
+import enigma.console.TextAttributes;
+import java.awt.Color;
+
 public class GameField { //deneme
 
     InputQueue inputQueue = new InputQueue();
@@ -36,16 +39,27 @@ public class GameField { //deneme
 
     }
 
-      public static void printScreen() {
-    	 
-    	 for(int i = 0; i < 23; i++) {    		 
-    		 for(int j = 0; j < 80; j++) {     		 
-        		 System.out.print(map[i][j]);
-        		         		 
-        	 } 
-    		  System.out.println("");
-    	 }   	 
-     }
+    public static void printScreen() {
+        for (int i = 0; i < 23; i++) {
+            for (int j = 0; j < 80; j++) {
+                char ch = map[i][j];
+
+                TextAttributes attrs;
+
+                if (ch == 'P' && j < 55) {
+                    attrs = new TextAttributes(Color.GREEN, Color.BLACK);
+                } else if (ch == 'C' && j < 55) {
+                    attrs = new TextAttributes(Color.RED, Color.BLACK);
+                } else if (ch == '#') {
+                    attrs = new TextAttributes(Color.WHITE, Color.BLUE); // duvar: mavi arka plan
+                } else {
+                    attrs = new TextAttributes(Color.WHITE, Color.BLACK); // varsayılan
+                }
+
+                cn.getTextWindow().output(j, i, ch, attrs);
+            }
+        }
+    }
              
     public boolean isWall(int x, int y) {
         return map[x][y] == '#';
