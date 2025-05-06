@@ -39,7 +39,7 @@ public class InputQueue {
            
          // current öğesini char'a dönüştürüp haritaya ekliyoruz
             char c = current.toString().charAt(0);  
-            GameField.map[2][58 + i] = c;  
+            GameField.map[2][56 + i] = c;  
             
             queue.enqueue(current);
         }
