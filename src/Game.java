@@ -20,13 +20,7 @@ public class Game {
     public int rkey; // key (for press/release)
     public int tempkey;
 
-    public void clearscreen() { // ekranın temizlenmesi
-        for (int i = 0; i < 80; i++) {
-            for (int z = 0; z < 30; z++) {
-                cn.getTextWindow().output(i, z, ' ');
-            }
-        }
-    }
+   
 
     // oyundaki skor değerleri
     int time = 0;
@@ -430,6 +424,13 @@ public class Game {
         clearscreen(); // ekranın temizlenmesi
         cn.getTextWindow().setCursorPosition(0, 0); // cursoru ayarla
         GameField.printScreen();
+    }
+    public void clearscreen() { // ekranın temizlenmesi
+        for (int i = 0; i < 80; i++) {
+            for (int z = 0; z < 30; z++) {
+                cn.getTextWindow().output(i, z, ' ');
+            }
+        }
     }
 
 }
