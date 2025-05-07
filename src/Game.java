@@ -24,7 +24,7 @@ public class Game {
 
     // oyundaki skor değerleri
     int time = 0;
-    int energy = 500;
+    int energy = 0;
     int life = 1000;
     int trap = 0;
     int playerscore = 0;
@@ -103,40 +103,67 @@ public class Game {
                 while (true) {
 
                     long currentTime = System.currentTimeMillis();
+                    if (keypr == 1) {
+                        if (energy > 0) {
+                            if (currentTime - lastPlayerTime >= timeUnit) {
+                                playersMove = true;
 
-                    if (currentTime - lastPlayerTime >= timeUnit) {
-
-                        if (keypr == 1) {
-
-                            playersMove = true;
-
-                            if (rkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1)) {
-                                energy -= 1;
-                                collectTreasures(px, py - 1);
-                                movePlayer(px, py - 1);
-                                tempkey = rkey;                           
+                                if (rkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1)) {
+                                    energy -= 1;
+                                    collectTreasures(px, py - 1);
+                                    movePlayer(px, py - 1);
+                                    tempkey = rkey;
+                                }
+                                if (rkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1)) {
+                                    energy -= 1;
+                                    collectTreasures(px, py + 1);
+                                    movePlayer(px, py + 1);
+                                    tempkey = rkey;
+                                }
+                                if (rkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py)) {
+                                    energy -= 1;
+                                    collectTreasures(px - 1, py);
+                                    movePlayer(px - 1, py);
+                                    tempkey = rkey;
+                                }
+                                if (rkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py)) {
+                                    energy -= 1;
+                                    collectTreasures(px + 1, py);
+                                    movePlayer(px + 1, py);
+                                    tempkey = rkey;
+                                }
                             }
-                            if (rkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1)) {
-                                energy -= 1;
-                                collectTreasures(px, py + 1);
-                                movePlayer(px, py + 1);
-                                tempkey = rkey;
-                            }
-                            if (rkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py)) {
-                                energy -= 1;
-                                collectTreasures(px - 1, py);
-                                movePlayer(px - 1, py);
-                                tempkey = rkey;
-                            }
-                            if (rkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py)) {
-                                energy -= 1;
-                                collectTreasures(px + 1, py);
-                                movePlayer(px + 1, py);
-                                tempkey = rkey;
-                            }
+                        }
+                        if (energy == 0) {
+                            if (currentTime - lastPlayerTime >= 2 * timeUnit) {
+                                playersMove = true;
 
-                            if (rkey == KeyEvent.VK_SPACE) {
-                                if (trap > 0) {
+                                if (rkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1)) {
+                                    collectTreasures(px, py - 1);
+                                    movePlayer(px, py - 1);
+                                    tempkey = rkey;
+                                }
+                                if (rkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1)) {
+                                    collectTreasures(px, py + 1);
+                                    movePlayer(px, py + 1);
+                                    tempkey = rkey;
+                                }
+                                if (rkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py)) {
+                                    collectTreasures(px - 1, py);
+                                    movePlayer(px - 1, py);
+                                    tempkey = rkey;
+                                }
+                                if (rkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py)) {
+                                    collectTreasures(px + 1, py);
+                                    movePlayer(px + 1, py);
+                                    tempkey = rkey;
+                                }
+                            }
+                        }
+
+                        if (rkey == KeyEvent.VK_SPACE) {
+                            if (trap > 0) {
+                                if (energy > 0) {
 
                                     trap--;
                                     int randomx = 0, randomy = 0;
@@ -189,11 +216,11 @@ public class Game {
                                     GameField.map[oldPx][oldPy] = '=';
                                 }
                             }
-
-                            updateGameBoard();
-                            playersMove = false;
-                            keypr = 0;
                         }
+
+                        updateGameBoard();
+                        playersMove = false;
+                        keypr = 0;
 
                         lastPlayerTime = currentTime;
                     }
