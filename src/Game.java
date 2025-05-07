@@ -120,9 +120,7 @@ public class Game {
                                 energy -= 1;
                                 collectTreasures(px, py - 1);
                                 movePlayer(px, py - 1);
-                                tempkey = rkey;
-                                isAlive=false;
-                                playersMove=false;                                
+                                tempkey = rkey;                           
                             }
                             if (rkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1)) {
                                 energy -= 1;
