@@ -1,106 +1,106 @@
+import enigma.console.TextAttributes;
+import java.awt.Color;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
 import enigma.core.Enigma;
 
-public class GameField { //deneme
+public class GameField {
 
     InputQueue inputQueue = new InputQueue();
 
     public static char[][] map = new char[23][80]; // map arrayini oyun parametrelerini de göstermesi için genişlettim.
-    enigma.console.Console cn;
+    public static enigma.console.Console cn;
 
     public GameField(enigma.console.Console console)
     {
-        this.cn = console; 
-       
+        cn = console;
+
         try {
-        	BufferedReader reader = new BufferedReader(new FileReader("maze.txt"));
-        	String s;
+            BufferedReader reader = new BufferedReader(new FileReader("maze.txt"));
+            String s;
             int row = 0;
             while ((s = reader.readLine()) != null && row < map.length) {
                 for (int col = 0; col < s.length() && col < map[0].length; col++) {
                     char c = s.charAt(col);
                     map[row][col] = c;
-                    cn.getTextWindow().output(col, row, c); 
+                    cn.getTextWindow().output(col, row, c);
                 }
                 row++;
             }
-        	reader.close();
+            reader.close();
         } catch(IOException e) {
-        	e.printStackTrace();
-        }    
-
+            e.printStackTrace();
+        }
     }
-    
-    
-    public static void loadMapToText() {  // önce map arrayini ekran.txt'e atarız
-    	
-    	try {
-            FileWriter writer = new FileWriter("ekran.txt", false);
+   
 
-            for (int i = 0; i < map.length; i++) {
-                for (int j = 0; j < map[i].length; j++) {
-                    writer.write(map[i][j]);
+    public static void printScreen() {
+        for (int i = 0; i < 23; i++) {
+            for (int j = 0; j < 80; j++) {
+                char ch = map[i][j];
+
+                TextAttributes attrs;
+
+                if(j < 55) {
+                    if (ch == 'P' && j < 55) {
+                        attrs = new TextAttributes(Color.BLACK, Color.BLUE);
+                    } else if (ch == 'C' && j < 55) {
+                        attrs = new TextAttributes(Color.BLACK, Color.GREEN);
+                    } else if(ch == 'S') {
+                    	attrs = new TextAttributes(Color.BLACK, Color.RED);
+                    } else if (ch == '#') {
+                        attrs = new TextAttributes(Color.WHITE, Color.BLACK); // duvar: mavi arka plan
+                    } else {
+                        attrs = new TextAttributes(Color.BLACK, Color.WHITE); // varsayılan
+                    }
+                } else {
+                	attrs = new TextAttributes(Color.WHITE, Color.BLACK); // varsayılan
                 }
-                writer.write("\n");
+                cn.getTextWindow().output(j, i, ch, attrs); 
             }
-            writer.close();
-           
-        } catch (IOException e) {
-        	e.printStackTrace();
-        }    	    	  	
+        }
     }
- 
-     public static void loadTextToScreen() {  // sonra ekran.txt'i yazdırırız.	
-    	
-    	 try {
-             BufferedReader reader = new BufferedReader(new FileReader("ekran.txt"));
-             String s;
 
-             while ((s = reader.readLine()) != null) {
-                 System.out.println(s);
-             }
-             reader.close();
-         } catch (IOException e) {
-         	e.printStackTrace();
 
-         }
-    }
-    
-         
     public boolean isWall(int x, int y) {
         return map[x][y] == '#';
-    }  
+    }
     
-    
+    public boolean isStuck(int x, int y) {
+        return isWall(x + 1, y) || isWall(x - 1, y) || isWall(x, y + 1) || isWall(x, y - 1) ;
+    }
+
     public void unloadInputQueue() {
-	 
-	 Random random = new Random();
-    		  
-    	  boolean isInserted = false;
-    	  
-    	  while(!isInserted) {
-    	
-    	  int x = random.nextInt(23);  
-    	  int y = random.nextInt(55); // rastgele koordinat belirlenmesi 
-    	  
-    	  if(map[x][y] == ' ') { // koordinat boşsa 
-    		  
-    		  Object next = inputQueue.dequeueInput(); 
-              char c = next.toString().charAt(0);
-                       
-              map[x][y] = c; // elementleri bir daha aynı yere eklememek için mazeMap'i de güncellemeliyiz
-              
-              isInserted = true; // element başarıyla yerleşti
-              
-              inputQueue.writeElements(); // Queue'yu tekrar yazdır. 
-    	  }	  
-       }     	     	    
-      	
-  }
-    
+        Random random = new Random();
+
+        boolean isInserted = false;
+
+        while (!isInserted) {
+            int x = random.nextInt(23);
+            int y = random.nextInt(55); // rastgele koordinat belirlenmesi
+
+            if (map[x][y] == ' ') { // koordinat boşsa
+                Object next = inputQueue.dequeueInput();
+                char c = next.toString().charAt(0);
+
+                map[x][y] = c; // elementleri bir daha aynı yere eklememek için mazeMap'i de güncellemeliyiz
+                
+                if(c == 'S') { 
+                	Game.robotS[Game.robotSCounter] = new SingleLinkedList();
+                    Game.robotS[Game.robotSCounter].add(c);
+                    Game.robotSX[Game.robotSCounter] = x;     Game.robotSY[Game.robotSCounter] = y;
+                	Game.robotSCounter++;
+                }
+
+                isInserted = true;
+
+                inputQueue.writeElements(); // Queue'yu tekrar yazdır.
+            }
+        }
+    }
+
 }
