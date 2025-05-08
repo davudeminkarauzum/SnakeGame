@@ -12,11 +12,13 @@ public class Game {
     Random random = new Random();
     
     boolean isAlive = true;
+    boolean playersMove = false;
     
     public KeyListener klis; 
  
-    public int keypr;   // key pressed?
-    public int rkey;    // key   (for press/release)
+    public int keypr; // key pressed?
+    public int rkey; // key (for press/release)
+    public int tempkey;
     
     public void clearscreen(){ // ekranın temizlenmesi
         for (int i=0;i<80;i++){
@@ -38,7 +40,6 @@ public class Game {
     // Oyuncunun ilk pozisyonu
     int px = 0, py = 0, cx = 0, cy = 0;
     Stack pathfinding = new Stack(500);
-    boolean arrived = false;
        
     void updateStatusPanel() { // skor değerlerinin güncellenip ekrana yazdırılması
     	
@@ -68,45 +69,72 @@ public class Game {
     void collectTreasures(int newPx, int newPy) { // treasure yedikten sonra puanlarını ekleyen fonksiyon
     	
     	if(GameField.map[newPx][newPy] == '1') {
+    		if(playersMove) {
     		playerscore += 1;
-    		energy += 50;
+    		energy += 50; }
+    		else
+    		computerscore += 1;
     	}
     	
     	if(GameField.map[newPx][newPy] == '2') {
+    		if(playersMove) {
     		playerscore += 4;
-    		energy += 150;
+    		energy += 150; }
+    		else
+        	computerscore += 4;
+
     	}
     	
     	if(GameField.map[newPx][newPy] == '3') {
+    		if(playersMove) {
     		playerscore += 16;
-    		energy += 250;
+    		energy += 250; }
+    		else
+            computerscore += 16;
     	}
     	
     	if(GameField.map[newPx][newPy] == '@') { 
+    		if(playersMove) 
     		trap++;
+    		else
+            computerscore += 50;
+	
     	}
     	
     	if(GameField.map[newPx][newPy] == 'S') {
+    		if(playersMove) {
     		playerscore += 200;
-    		energy += 500;
+    		energy += 500; }
     	}   	
     }
     
-    void movePlayer(int newPx, int newPy) { // oyuncunun hareketi fonksiyon haline getirdim
-        GameField.map[px][py] = ' ';
-        px = newPx;
-        py = newPy;
-        GameField.map[px][py] = 'P';
+    public boolean crashedComputer(){
+    	boolean flag = false;
+    	if (GameField.map[px][py] == 'P' && (GameField.map[px + 1][py] == 'C' || GameField.map[px - 1][py] == 'C' 
+    			|| GameField.map[px][py + 1] == 'C' || GameField.map[px][py] == 'C')) {
+    		flag = true;
+    		life -= 30;
+    	}
+    	
+    	return flag;
     }
     
-    void moveComputer(int newPx, int newPy) { // oyuncunun hareketi fonksiyon haline getirdim
-        GameField.map[cx][cy] = ' ';
-        cx = newPx;
-        cy = newPy;
-        GameField.map[cx][cy] = 'C';
+    void move(int newPx, int newPy) {
+    	if(playersMove) {
+            GameField.map[px][py] = ' ';
+            px = newPx;
+            py = newPy;
+            GameField.map[px][py] = 'P';
+    	}
+        else {
+            GameField.map[cx][cy] = ' ';
+            cx = newPx;
+            cy = newPy;
+            GameField.map[cx][cy] = 'C';
+        }
     }
-       
-   void updateGameBoard() { // tahtayı güncelleyen fonksiyon
+     
+   public void updateGameBoard() { // tahtayı güncelleyen fonksiyon
     	
     	updateStatusPanel(); // değerlerin güncellenmesi       
         clearscreen();   // ekranın temizlenmesi
@@ -129,7 +157,7 @@ public class Game {
         public void keyReleased(KeyEvent e) {}
     };
     
-    long lastTime = System.currentTimeMillis();
+    long lastPlayerTime = System.currentTimeMillis();
         long timeUnit = 100; 
         
     long lastInputTime = System.currentTimeMillis();
@@ -137,6 +165,9 @@ public class Game {
         
     long lastSecondTime = System.currentTimeMillis();
          long secondInterval = 1000; // 1 saniye
+         
+    long lastComputerTime = System.currentTimeMillis();
+         long computerInterval = 400; 
     
     cn.getTextWindow().setCursorPosition(25, 0);
     cn.getTextWindow().output("Welcome to the snake game");
@@ -175,91 +206,133 @@ public class Game {
 
                 long currentTime = System.currentTimeMillis();
 
-                if (currentTime - lastTime >= timeUnit) {   
+                if (currentTime - lastPlayerTime >= timeUnit) {   
                 	
                     if (keypr == 1) {
-                
-                        if (rkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1)) {
+                    	
+                     playersMove = true;
+
+                        if (rkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1) && !crashedComputer()) {
                         	energy -= 1;
                         	collectTreasures(px, py - 1);
-                        	movePlayer(px, py - 1);
+                        	move(px, py - 1);
+                        	tempkey = rkey;
                         }
-                        if (rkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1)) {
+                        if (rkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1) && !crashedComputer()) {
                         	energy -= 1;
                         	collectTreasures(px, py + 1);
-                        	movePlayer(px, py + 1);
+                        	move(px, py + 1);
+                        	tempkey = rkey;
                         }
-                        if (rkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py)) { 
+                        if (rkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py) && !crashedComputer()) { 
                         	energy -= 1;
                         	collectTreasures(px - 1, py);
-                        	movePlayer(px - 1, py);
+                        	move(px - 1, py);
+                        	tempkey = rkey;
                         }
-                        if (rkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py)) {
+                        if (rkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py) && !crashedComputer()) {
                         	energy -= 1;
                         	collectTreasures(px + 1, py);
-                        	movePlayer(px + 1, py);
+                        	move(px + 1, py );
+                        	tempkey = rkey;
                         }
-                        if (rkey == KeyEvent.VK_SPACE) {                    	                                       	
-                        	if (trap > 0) {
-                        		
-                        	trap--;                      	
-                        	int randomx, randomy;
-                        	                    	
-                        	do {                  		
-                        		randomx = 0;
-                        		randomy = 0;
-                        		
-                        		int randommove = random.nextInt(4);
-                        		
-                        		switch(randommove) {
-                        		
-                        		case(0): { randomx = -1; break; }
-                        		case(1): { randomx = 1; break; }
-                        		case(2): { randomy = -1; break; }
-                        		case(3): { randomy = 1; break; }                     		
-                        		}                  	                    	
-                        	} while(gameField.isWall(px + randomx, py + randomy));
-                                           	
-                        	int oldPx = px, oldPy = py;
-
-                            energy -= 1;
-                        	collectTreasures(px + randomx, py + randomy);
-                        	movePlayer(px + randomx, py + randomy);
-                        	GameField.map[oldPx][oldPy] = '=';                    	                	                   	                  	                	
-                        	}                    	
-                        }
-                       
-                        keypr = 0;                   
-                    }
                     
-                    if (arrived == false) {   
-                        while(!pathfinding.isEmpty()) {
-                       	    String way = (String) pathfinding.pop();
-                         	if(way.equals("R")) { // Right
-                        		moveComputer(cx, cy + 1);
-                        	} else if(way.equals("D")) { //Down
-                        		moveComputer(cx + 1, cy);
-                        	} else if(way.equals("L")) { //Left
-                        	    moveComputer(cx, cy - 1);
-                        	} else if(way.equals("U")) {  //Up
-                        		moveComputer(cx - 1, cy);
-                        	}
-                        }
-                        arrived = true;
-                    } else {
-                        char[][] tempMap= new char[23][55];
-                        
-                        for(int i = 0; i < 23; i++) {
-                            for(int j = 0; j < 55; j++) {
-                            	tempMap[i][j] = GameField.map[i][j] ;
+                        if (rkey == KeyEvent.VK_SPACE) {
+                            if (trap > 0) {
+
+                                trap--;
+                                int randomx = 0, randomy = 0;
+
+                                int lastmove = 4;
+
+                                if (tempkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1)) {
+                                    randomy = 1;
+                                } else if (tempkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1)) {
+                                    randomy = -1;
+                                } else if (tempkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py)) {
+                                    randomx = -1;
+                                } else if (tempkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py)) {
+                                    randomx = 1;
+                                } else {
+                                	
+                                   do {
+                                	   randomx = 0;
+                               		   randomy = 0;
+                               		   
+                                        lastmove = random.nextInt(4);
+                                        switch (lastmove) {
+
+                                            case (0): {
+                                                randomx = -1;
+                                                break;
+                                            }
+                                            case (1): {
+                                                randomx = 1;
+                                                break;
+                                            }
+                                            case (2): {
+                                                randomy = -1;
+                                                break;
+                                            }
+                                            case (3): {
+                                                randomy = 1;
+                                                break;
+                                            }
+                                        }
+                                    } while (gameField.isWall(px + randomx, py + randomy));
+                                }
+
+                                int oldPx = px;
+                                int oldPy = py;
+
+                                energy -= 1;
+                                collectTreasures(px + randomx, py + randomy);
+                                move(px + randomx, py + randomy);
+                                GameField.map[oldPx][oldPy] = '=';
                             }
                         }
-                        pathfinding = findPath(tempMap, cx, cy);
-                        arrived = false;
+                       
+                        updateGameBoard();  
+                        playersMove = false;
+                        keypr = 0;                     
                     }
-                    updateGameBoard(); 
-                    lastTime = currentTime;
+                    
+                    lastPlayerTime = currentTime;
                 }
+                
+              if (currentTime - lastComputerTime >= computerInterval) { // computer move
+                            
+                if (!pathfinding.isEmpty()) {   
+                    String way = (String) pathfinding.pop();
+                    if (way.equals("R")) { 
+                    	collectTreasures(cx, cy + 1);
+                        move(cx, cy + 1);
+                    }
+                    else if (way.equals("D")) {
+                    	collectTreasures(cx + 1, cy);
+                        move(cx + 1, cy);
+                    } 
+                    else if (way.equals("L")) {
+                    	collectTreasures(cx, cy - 1);
+                        move(cx, cy - 1);
+                    }
+                    else if (way.equals("U")) {
+                    	collectTreasures(cx - 1, cy);
+                        move(cx - 1, cy);
+                    } 
+                } else {
+                    char[][] tempMap= new char[23][55];
+                    
+                    for(int i = 0; i < 23; i++) {
+                        for(int j = 0; j < 55; j++) {
+                        	tempMap[i][j] = GameField.map[i][j] ;
+                        }
+                    }
+                    pathfinding = findPath(tempMap, cx, cy);
+                }
+                updateGameBoard();        
+            	lastComputerTime = currentTime;
+             }
                           
                 if (currentTime - lastInputTime >= inputInterval)  { // 2 saniyede bir input Queue'dan eleman yerleştirilmesi
                     gameField.unloadInputQueue();                   
@@ -280,69 +353,44 @@ public class Game {
   }
     
     public static Stack findPath(char[][] map, int cx, int cy) {
-
         Random rnd = new Random();
         int targetedX = 0, targetedY = 0;
-        
+
         while (!(map[targetedX][targetedY] == '1' || 
-        		 map[targetedX][targetedY] == '2' || 
+                 map[targetedX][targetedY] == '2' || 
                  map[targetedX][targetedY] == '3' || 
-                 map[targetedX][targetedY] == '@' || 
-                 map[targetedX][targetedY] == 'S')) {
-            targetedX = rnd.nextInt(1, 22);
-            targetedY = rnd.nextInt(1, 55); 
+                 map[targetedX][targetedY] == '@')) {
+            targetedX = rnd.nextInt(1, map.length);
+            targetedY = rnd.nextInt(1, map[0].length); 
         }
 
-        boolean[][] visited = new boolean[map[0].length][map[1].length];
-        int[][][] parent = new int[map[0].length][map[1].length][2]; 
+        boolean[][] visited = new boolean[map.length][map[0].length];
+        int[][][] parent = new int[map.length][map[0].length][2];
 
         Stack stack = new Stack(500);
         stack.push(new int[]{cx, cy});
 
-        int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}; // right, down, left, up
+        int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}; //right, up, left, down
 
         while (!stack.isEmpty()) {
             int[] current = (int[]) stack.pop();
             int x = current[0], y = current[1];
 
-            if (x < 0 || y < 0 || x >= map[0].length || y >= map[1].length || visited[x][y] || map[x][y] == '#')
-                continue;
+            if (x < 0 || y < 0 || x >= map.length || y >= map[0].length|| visited[x][y] || map[x][y] == '#') {
+            	continue;
+            }
 
             visited[x][y] = true;
 
             if (x == targetedX && y == targetedY) {
-                Stack result = new Stack(500);
-                
-                while (!(targetedX == cx && targetedY == cy)) {
-                    int tempX = parent[targetedX][targetedY][0];
-                    int tempY = parent[targetedX][targetedY][1];
-
-                    if (targetedX - tempX == 0 && targetedY - tempY == 1) {
-                        result.push("D"); // Down
-                    } else if (targetedX - tempX == 0 && targetedY - tempY == -1) {
-                        result.push("U"); // Up
-                    } else if (targetedX - tempX == 1 && targetedY - tempY == 0) {
-                        result.push("R"); // Right
-                    } else if (targetedX - tempX == -1 && targetedY - tempY == 0) {
-                        result.push("L"); // Left
-                    }
-                    
-                    if (!(tempX == cx && tempY == cy)) { 
-                        GameField.map[tempX][tempY] = '.';
-                    }
-                    
-                    targetedX = tempX;
-                    targetedY = tempY;
-                }
-                return result;
+            	break;
             }
 
             for (int i = 0; i < 4; i++) {
-                int nx = x + directions[i][0];
-                int ny = y + directions[i][1];
+                int nx = x + directions[i][0], ny = y + directions[i][1];
 
-                if (nx >= 0 && ny >= 0 && nx < map[0].length && ny < map[1].length && !visited[nx][ny] && map[nx][ny] != ' ') {
-                    visited[nx][ny] = true;
+                if (nx >= 0 && ny >= 0 && nx < map.length && ny < map[0].length &&
+                    !visited[nx][ny] && map[nx][ny] != '#') {
                     stack.push(new int[]{nx, ny});
                     parent[nx][ny][0] = x;
                     parent[nx][ny][1] = y;
@@ -350,9 +398,30 @@ public class Game {
             }
         }
 
-        return new Stack(500);
+        Stack result = new Stack(500);
+
+        while (!(targetedX == cx && targetedY == cy)) {
+            int tempX = parent[targetedX][targetedY][0], tempY = parent[targetedX][targetedY][1];
+
+            if (targetedX - tempX == 0 && targetedY - tempY == 1) { //Right
+            	result.push("R");
+            }
+            else if (targetedX - tempX == 0 && targetedY - tempY == -1) { // Left
+            	result.push("L");
+            }
+            else if (targetedX - tempX == 1 && targetedY - tempY == 0) { //Down
+            	result.push("D");
+            }
+            else if (targetedX - tempX == -1 && targetedY - tempY == 0) { //Up
+            	result.push("U");
+            }
+
+            targetedX = tempX;    targetedY = tempY;
+            
+
+        }
+
+        return result;
     }
-
 }
-
 
