@@ -77,41 +77,42 @@ public class Game {
     	
     	if(GameField.map[newPx][newPy] == '1') {
     		if(playersMove) {
-    		playerscore += 1;
-    		energy += 50; }
+    		    playerscore += 1;
+    		    energy += 50; }
     		else
-    		computerscore += 1;
+    		    computerscore += 1;
     	}
     	
     	if(GameField.map[newPx][newPy] == '2') {
     		if(playersMove) {
-    		playerscore += 4;
-    		energy += 150; }
-    		else
-        	computerscore += 4;
+    		    playerscore += 4;
+    		    energy += 150; 
+    		} else
+        	    computerscore += 4;
 
     	}
     	
     	if(GameField.map[newPx][newPy] == '3') {
     		if(playersMove) {
-    		playerscore += 16;
-    		energy += 250; }
-    		else
-            computerscore += 16;
+    		    playerscore += 16;
+    		    energy += 250; 
+    		} else
+                computerscore += 16;
     	}
     	
     	if(GameField.map[newPx][newPy] == '@') { 
     		if(playersMove) 
-    		trap++;
+    		    trap++;
     		else
-            computerscore += 50;
-	
+                computerscore += 50;
     	}
     	
     	if(GameField.map[newPx][newPy] == 'S') {
     		if(playersMove) {
-    		playerscore += 200;
-    		energy += 500; }
+    		    playerscore += 200;
+    		    energy += 500; 
+    		    robotSCounter--;
+    	    }
     	}   	
     }
     
@@ -461,3 +462,5 @@ public class Game {
         return result;
     }
 }
+
+
