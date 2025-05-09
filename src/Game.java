@@ -220,6 +220,11 @@ public class Game {
 
                 long currentTime = System.currentTimeMillis();
 
+                  if(energy > 0)
+                	timeUnit = 100;
+                else
+                	timeUnit = 200;     
+
                 if (currentTime - lastPlayerTime >= timeUnit) {   
                 	
                     if (keypr == 1) {
@@ -227,25 +232,29 @@ public class Game {
                      playersMove = true;
 
                         if (rkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1) && !crashedComputer()) {
-                        	energy -= 1;
+                        	if(energy > 0)
+                          	   energy -= 1;  
                         	collectTreasures(px, py - 1);
                         	move(px, py - 1, 0);
                         	tempkey = rkey;
                         }
                         if (rkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1) && !crashedComputer()) {
-                        	energy -= 1;
+                        	if(energy > 0)
+                          	   energy -= 1;  
                         	collectTreasures(px, py + 1);
                         	move(px, py + 1, 0);
                         	tempkey = rkey;
                         }
                         if (rkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py) && !crashedComputer()) { 
-                        	energy -= 1;
+                        	if(energy > 0)
+                          	   energy -= 1;  
                         	collectTreasures(px - 1, py);
                         	move(px - 1, py, 0);
                         	tempkey = rkey;
                         }
                         if (rkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py) && !crashedComputer()) {
-                        	energy -= 1;
+                        	if(energy > 0)
+                          	   energy -= 1;  
                         	collectTreasures(px + 1, py);
                         	move(px + 1, py, 0);
                         	tempkey = rkey;
@@ -299,7 +308,8 @@ public class Game {
                                 int oldPx = px;
                                 int oldPy = py;
 
-                                energy -= 1;
+                                if(energy > 0)
+                          	       energy -= 1;  
                                 collectTreasures(px + randomx, py + randomy);
                                 move(px + randomx, py + randomy, 0);
                                 GameField.map[oldPx][oldPy] = '=';
