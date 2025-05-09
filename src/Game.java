@@ -105,36 +105,20 @@ public class Game {
                 computerscore += 50;
     	}   	
     }
-    
-    public boolean crashedRobots(){
-    	boolean flag = false;
-    	if (GameField.map[px][py] == 'P' && (GameField.map[px + 1][py] == 'C' || GameField.map[px - 1][py] == 'C' 
-    			|| GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C')) {
-    		flag = true;
-    		life -= 30;
-    	} else if (GameField.map[px][py] == 'P' && (GameField.map[px + 1][py] == 'S' || GameField.map[px - 1][py] == 'S' 
-    			|| GameField.map[px][py + 1] == 'S' || GameField.map[px][py - 1] == 'S')) {
-    		flag = true;
-    		life -= 1;
-    	}
-    	return flag;
-    }
-    
-    public boolean crashedRobotSToComputer(){
-    	return (GameField.map[cx][cy] == 'C' && (GameField.map[cx + 1][cy] == 'C' || GameField.map[cx - 1][cy] == 'C' 
-    			|| GameField.map[cx][cy + 1] == 'S' || GameField.map[cx][cy - 1] == 'C'));
-    }
-    
+
     void move(int newX, int newY, int i) {
-    	if(playersMove && !(GameField.map[newX][newY] == 'C' || GameField.map[newX][newY] == 'S')) {
+    	if(playersMove) {
             GameField.map[px][py] = ' ';
             px = newX;     py = newY;
             GameField.map[px][py] = 'P';
-    	} else if(robotSMove && !(crashedRobots() || crashedRobotSToComputer())) {
+        	if(energy > 0) { //Spending energy
+        		energy--;
+        	}
+    	} else if(robotSMove) {
     		GameField.map[robotSX[i]][robotSY[i]] = ' ';
     		robotSX[i] = newX;     robotSY[i] = newY;
     		GameField.map[robotSX[i]][robotSY[i]] = 'S';
-    	} else if(computersMove){
+    	} else if(computersMove) {
             GameField.map[cx][cy] = ' ';
             cx = newX;     cy = newY;
             GameField.map[cx][cy] = 'C';
@@ -164,6 +148,7 @@ public class Game {
     };
     
     long lastPlayerTime = System.currentTimeMillis();
+    long lastHarmingTime  = System.currentTimeMillis();
         long timeUnit = 100; 
         
     long lastInputTime = System.currentTimeMillis();
@@ -227,22 +212,22 @@ public class Game {
                     	
                      playersMove = true;
 
-                        if (rkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1)) {
+                        if (rkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1) && !gameField.isCrashedRobots(px, py - 1)) {
                         	collectTreasures(px, py - 1);
                         	move(px, py - 1, 0);
                         	tempkey = rkey;
                         }
-                        if (rkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1)) {
+                        if (rkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1) && !gameField.isCrashedRobots(px, py + 1)) {
                         	collectTreasures(px, py + 1);
                         	move(px, py + 1, 0);
                         	tempkey = rkey;
                         }
-                        if (rkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py)) { 
+                        if (rkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py) && !gameField.isCrashedRobots(px - 1, py)) { 
                         	collectTreasures(px - 1, py);
                         	move(px - 1, py, 0);
                         	tempkey = rkey;
                         }
-                        if (rkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py)) {
+                        if (rkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py) && !gameField.isCrashedRobots(px + 1, py)) {
                         	collectTreasures(px + 1, py);
                         	move(px + 1, py, 0);
                         	tempkey = rkey;
@@ -303,37 +288,42 @@ public class Game {
                             
                         }
                         
-                    	if(energy > 0) { //Spending energy
-                    		energy--;
-                    	}
-                    	
                         updateGameBoard();  
                         playersMove = false;
                         keypr = 0;                     
                     }
+                   
                     
                     lastPlayerTime = currentTime;
                 }
                 
               if (currentTime - lastComputerTime >= computerInterval) { // computer move
-            	  
+            	        	    
             	  computersMove = true;
-        	    
-          	      if(!pathfinding.isEmpty() && !(crashedRobots() || crashedRobotSToComputer()) ) {
-                      String way = (String) pathfinding.pop();
-                      if (way.equals("R")) { 
-                      	collectTreasures(cx, cy + 1);
-                          move(cx, cy + 1, 0);
-                      } else if (way.equals("D")) {
-                      	collectTreasures(cx + 1, cy);
-                          move(cx + 1, cy, 0);
-                      } else if (way.equals("L")) {
-                      	collectTreasures(cx, cy - 1);
-                          move(cx, cy - 1, 0);
-                      } else if (way.equals("U")) {
-                      	collectTreasures(cx - 1, cy);
-                          move(cx - 1, cy, 0);
-                      } 
+            	  boolean moved = false;
+          	      if(!pathfinding.isEmpty()) {
+            	    	String way = (String) pathfinding.peek();
+                        if (way.equals("R") && GameField.map[cx][cy + 1] != 'P') {
+                        	collectTreasures(cx, cy + 1);
+                            move(cx, cy + 1, 0);
+                            moved = true;
+                        } else if (way.equals("D") && GameField.map[cx + 1][cy] != 'P') {
+                      	    collectTreasures(cx + 1, cy);
+                            move(cx + 1, cy, 0);
+                            moved = true;
+                        } else if (way.equals("L") && GameField.map[cx][cy - 1] != 'P') {
+                      	    collectTreasures(cx, cy - 1);
+                            move(cx, cy - 1, 0);
+                            moved = true;
+                        } else if (way.equals("U") && GameField.map[cx - 1][cy] != 'P') {
+                      	    collectTreasures(cx - 1, cy);
+                            move(cx - 1, cy, 0);
+                            moved = true;
+                        } 
+                        
+                        if(moved) {
+                        	pathfinding.pop();
+                        }
           	       } else {
                       char[][] tempMap= new char[23][55];
                       
@@ -343,9 +333,8 @@ public class Game {
                           }
                       }
                       pathfinding = findPath(tempMap, cx, cy);
-                     
                     }
-             
+           
           	        computersMove = false;
                     updateGameBoard();        
               	    lastComputerTime = currentTime;
@@ -387,7 +376,17 @@ public class Game {
                     updateGameBoard();    
                     lastSecondTime = currentTime;
                 }
-                            
+                
+                if(currentTime - lastHarmingTime >= timeUnit) {
+                	if(GameField.map[px + 1][py] == 'C' || GameField.map[px - 1][py] == 'C'
+                			|| GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C') {
+                		life -= 30;
+                	} else if(GameField.map[px + 1][py] == 'S' || GameField.map[px - 1][py] == 'S'
+                			|| GameField.map[px][py + 1] == 'S' || GameField.map[px][py - 1] == 'S') {
+                		life -= 1;
+                	}
+                	lastHarmingTime = currentTime;
+                }       
                 Thread.sleep(20);
              }
         }
@@ -466,5 +465,3 @@ public class Game {
         return result;
     }
 }
-
-
