@@ -1,3 +1,4 @@
+
 import enigma.console.TextAttributes;
 import java.awt.Color;
 
@@ -73,6 +74,20 @@ public class GameField {
     public boolean isStuck(int x, int y) {
         return isWall(x + 1, y) || isWall(x - 1, y) || isWall(x, y + 1) || isWall(x, y - 1) ;
     }
+    
+    public static boolean isCrashedComputer(int x, int y) {
+        return map[x][y] == 'C';
+    }
+    
+    public static boolean isCrashedS(int x, int y) {
+        return map[x][y] == 'S';
+    }
+    
+    public boolean isCrashedRobots(int x, int y) {
+    	return isCrashedComputer(x, y) || isCrashedS(x, y);
+    }
+    
+    
 
     public void unloadInputQueue() {
         Random random = new Random();
@@ -95,7 +110,6 @@ public class GameField {
                     Game.robotSX[Game.robotSCounter] = x;     Game.robotSY[Game.robotSCounter] = y;
                 	Game.robotSCounter++;
                 }
-
                 isInserted = true;
 
                 inputQueue.writeElements(); // Queue'yu tekrar yazdır.
