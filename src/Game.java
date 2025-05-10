@@ -148,8 +148,7 @@ public class Game {
         public void keyReleased(KeyEvent e) {}
     };
     
-    int gametiming = 0;
-    int playermod = 0;
+    int gametiming = 0;    
     
     cn.getTextWindow().setCursorPosition(25, 0);
     cn.getTextWindow().output("Welcome to the snake game");
@@ -185,13 +184,8 @@ public class Game {
              while(true) {
             	 
              updateGameBoard();  
-                
-                if(energy > 0) 
-                     playermod = 1; 
-                 else 
-                     playermod = 2;
-            
-                if (gametiming % playermod == 0) {  // 0.1 ya da 0.2 saniye 
+                     
+                if (energy > 0 || gametiming % 2 == 0) {  // 0.1 ya da 0.2 saniye 
                 	
                     if (keypr == 1) {
                     	
