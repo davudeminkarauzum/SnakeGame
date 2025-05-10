@@ -1,3 +1,4 @@
+
 import java.util.Scanner;
 import java.util.Random;
 import java.awt.event.KeyEvent;
@@ -147,21 +148,8 @@ public class Game {
         public void keyReleased(KeyEvent e) {}
     };
     
-    long lastPlayerTime = System.currentTimeMillis();
-    long lastHarmingTime  = System.currentTimeMillis();
-        long timeUnit = 100; 
-        
-    long lastInputTime = System.currentTimeMillis();
-        long inputInterval = 2000; // 2 saniye
-        
-    long lastSecondTime = System.currentTimeMillis();
-         long secondInterval = 1000; // 1 saniye
-         
-    long lastComputerTime = System.currentTimeMillis();
-         long computerInterval = 400; 
-         
-    long lastRobotSTime = System.currentTimeMillis();
-         long robotSInterval = 400; 
+    int gametiming = 0;
+    int playermod = 0;
     
     cn.getTextWindow().setCursorPosition(25, 0);
     cn.getTextWindow().output("Welcome to the snake game");
@@ -193,20 +181,17 @@ public class Game {
              
              for(int i = 0; i < 30; i++) // oyunun başında tahtaya input queue'dan 30 element boşalt
                 gameField.unloadInputQueue();
-             
-             updateGameBoard();             
-             
+                          
              while(true) {
-
-                long currentTime = System.currentTimeMillis();
+            	 
+             updateGameBoard();  
                 
-                if(energy > 0) {
-                  	timeUnit = 100;
-                } else {
-                  	timeUnit = 200;
-                }
-
-                if (currentTime - lastPlayerTime >= timeUnit) {   
+                if(energy > 0) 
+                     playermod = 1; 
+                 else 
+                     playermod = 2;
+            
+                if (gametiming % playermod == 0) {  // 0.1 ya da 0.2 saniye 
                 	
                     if (keypr == 1) {
                     	
@@ -284,20 +269,15 @@ public class Game {
                                 collectTreasures(px + randomx, py + randomy);
                                 move(px + randomx, py + randomy, 0);
                                 GameField.map[oldPx][oldPy] = '=';
-                            }
-                            
+                            }                            
                         }
                         
-                        updateGameBoard();  
                         playersMove = false;
                         keypr = 0;                     
-                    }
-                   
-                    
-                    lastPlayerTime = currentTime;
+                    }                  
                 }
                 
-              if (currentTime - lastComputerTime >= computerInterval) { // computer move
+              if (gametiming % 4 == 0) { // computer move (0.4 saniye)
             	        	    
             	  computersMove = true;
             	  boolean moved = false;
@@ -336,11 +316,8 @@ public class Game {
                     }
            
           	        computersMove = false;
-                    updateGameBoard();        
-              	    lastComputerTime = currentTime;
                 }
-              
-                         
+                                      
         	  /*for(int i = 0; i < robotSCounter; i++) {
         		  if (currentTime - lastRobotSTime >= robotSInterval) { 
         			  robotSMove = true;
@@ -365,19 +342,15 @@ public class Game {
         		  }
         	  }*/
             
-                if (currentTime - lastInputTime >= inputInterval)  { // 2 saniyede bir input Queue'dan eleman yerleştirilmesi
+                if (gametiming % 20 == 0)  { // 2 saniyede bir input Queue'dan eleman yerleştirilmesi
                     gameField.unloadInputQueue();                   
-                    updateGameBoard();                  
-                    lastInputTime = currentTime;
                 }
                 
-                if (currentTime - lastSecondTime >= secondInterval) { // her saniyede time değişkeninin arttırılması
+                if (gametiming % 10 == 0) { // her saniyede time değişkeninin arttırılması
                     time++;
-                    updateGameBoard();    
-                    lastSecondTime = currentTime;
                 }
                 
-                if(currentTime - lastHarmingTime >= timeUnit) {
+                if(gametiming % 1 == 0) { 
                 	if(GameField.map[px + 1][py] == 'C' || GameField.map[px - 1][py] == 'C'
                 			|| GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C') {
                 		life -= 30;
@@ -385,9 +358,17 @@ public class Game {
                 			|| GameField.map[px][py + 1] == 'S' || GameField.map[px][py - 1] == 'S') {
                 		life -= 1;
                 	}
-                	lastHarmingTime = currentTime;
+                	
                 }       
-                Thread.sleep(20);
+
+                try {
+                    Thread.sleep(100); // 1 time unit
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                
+                gametiming++;  // 0.1 saniyede bir artar
+                
              }
         }
      }
@@ -457,8 +438,7 @@ public class Game {
             	result.push("U");
             }
 
-            targetedX = tempX;    targetedY = tempY;
-            
+            targetedX = tempX;    targetedY = tempY;           
 
         }
 
