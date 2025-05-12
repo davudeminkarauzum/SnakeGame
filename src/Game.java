@@ -1,4 +1,5 @@
 
+
 import java.util.Scanner;
 import java.util.Random;
 import java.awt.event.KeyEvent;
@@ -10,7 +11,7 @@ public class Game {
     enigma.console.Console cn = Enigma.getConsole("Snake Game", 80, 15);
 
     private Scanner scanner;
-    Random random = new Random();
+    static Random random = new Random();
 
     boolean playersMove = false;
     boolean computersMove = false;
@@ -332,7 +333,7 @@ public class Game {
                                     tempMap[i][j] = GameField.map[i][j];
                                 }
                             }
-                            pathfinding = findPath(tempMap, cx, cy);
+                            pathfinding = pathfinding(tempMap, cx, cy);
                         }
 
                         computersMove = false;
@@ -406,74 +407,72 @@ public class Game {
         }
     }
 
-    public static Stack findPath(char[][] map, int cx, int cy) {
-        Random rnd = new Random();
+    public static Stack pathfinding(char[][] map, int cx, int cy) {
         int targetedX = 0, targetedY = 0;
 
         while (!(map[targetedX][targetedY] == '1' ||
                 map[targetedX][targetedY] == '2' ||
                 map[targetedX][targetedY] == '3' ||
                 map[targetedX][targetedY] == '@')) {
-            targetedX = rnd.nextInt(1, map.length);
-            targetedY = rnd.nextInt(1, map[0].length);
+            targetedX = random.nextInt(1, map.length);
+            targetedY = random.nextInt(1, map[0].length);
         }
 
         boolean[][] visited = new boolean[map.length][map[0].length];
         int[][][] parent = new int[map.length][map[0].length][2];
 
-        Stack stack = new Stack(500);
+        Stack stack = new Stack(1000);
         stack.push(new int[]{cx, cy});
+        visited[cx][cy] = true;
 
-        int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}; //right, up, left, down
+        int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}; //Right, Down, Left, Up
 
-        while (!stack.isEmpty()) {
-            int[] current = (int[]) stack.pop();
-            int x = current[0], y = current[1];
+        Stack[] bfsGraph = new Stack[map.length * map[0].length]; 
+        int depth = 0, x = 0, y = 0;
 
-            if (x < 0 || y < 0 || x >= map.length || y >= map[0].length || visited[x][y] || map[x][y] == '#') {
-                continue;
-            }
+        while (!stack.isEmpty() && !(x == targetedX && y == targetedY)) {
+            Stack currentLevelStack = new Stack(1000); 
+            while (!stack.isEmpty()) {
+                int[] current = (int[]) stack.pop();
+                x = current[0];     y = current[1];
 
-            visited[x][y] = true;
+                for (int i = 0; i < 4; i++) {
+                    int nx = x + directions[i][0], ny = y + directions[i][1];
 
-            if (x == targetedX && y == targetedY) {
-                break;
-            }
-
-            for (int i = 0; i < 4; i++) {
-                int nx = x + directions[i][0], ny = y + directions[i][1];
-
-                if (nx >= 0 && ny >= 0 && nx < map.length && ny < map[0].length &&
-                        !visited[nx][ny] && map[nx][ny] != '#') {
-                    stack.push(new int[]{nx, ny});
-                    parent[nx][ny][0] = x;
-                    parent[nx][ny][1] = y;
+                    if (!visited[nx][ny] && map[nx][ny] != '#' && map[nx][ny] != 'P' && map[nx][ny] != 'S') {
+                        currentLevelStack.push(new int[]{nx, ny});
+                        visited[nx][ny] = true;
+                        parent[nx][ny][0] = x;     parent[nx][ny][1] = y;
+                    }
                 }
             }
+
+            bfsGraph[depth] = currentLevelStack;
+            stack = currentLevelStack;
+            depth++;
         }
 
-        Stack result = new Stack(500);
-
+        Stack result = new Stack(1000);
         while (!(targetedX == cx && targetedY == cy)) {
             int tempX = parent[targetedX][targetedY][0], tempY = parent[targetedX][targetedY][1];
 
-            if (targetedX - tempX == 0 && targetedY - tempY == 1) { //Right
+            if (targetedX - tempX == 0 && targetedY - tempY == 1) {
                 result.push("R");
-            } else if (targetedX - tempX == 0 && targetedY - tempY == -1) { // Left
+            } else if (targetedX - tempX == 0 && targetedY - tempY == -1) {
                 result.push("L");
-            } else if (targetedX - tempX == 1 && targetedY - tempY == 0) { //Down
+            } else if (targetedX - tempX == 1 && targetedY - tempY == 0) {
                 result.push("D");
-            } else if (targetedX - tempX == -1 && targetedY - tempY == 0) { //Up
+            } else if (targetedX - tempX == -1 && targetedY - tempY == 0) { 
                 result.push("U");
             }
-
-            targetedX = tempX;
-            targetedY = tempY;
-
+            
+            targetedX = tempX;     targetedY = tempY;
+            GameField.map[targetedX][targetedY] = '.';
         }
-
+        
         return result;
     }
+
 
     public void scanForSnakes(char[][] array){
         for (int i = 0; i < 23; i++) {
