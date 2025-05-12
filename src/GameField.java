@@ -57,14 +57,13 @@ public class GameField {
                     	attrs = new TextAttributes(Color.BLACK, Color.RED);
                     } else if (ch == '#') {
                         attrs = new TextAttributes(Color.WHITE, Color.BLACK); // duvar: mavi arka plan
-                    } 
-                    else if (ch == '=') {
+                    } else if (ch == '=') {
                         attrs = new TextAttributes(Color.BLACK, Color.GREEN); // duvar: mavi arka plan
-                    }
-                    else if (ch == 'X') {
+                    } else if (ch == 'X') {
                         attrs = new TextAttributes(Color.BLACK, Color.WHITE); // duvar: mavi arka plan
-                    }
-                    else {
+                    } else if(ch == '.') {
+                    	attrs = new TextAttributes(Color.WHITE, Color.YELLOW);
+                    } else {
                         attrs = new TextAttributes(Color.BLACK, Color.WHITE); // varsayılan
                     }
                 }   else {
