@@ -1,3 +1,4 @@
+
 import java.util.Scanner;
 import java.util.Random;
 import java.awt.event.KeyEvent;
@@ -46,6 +47,8 @@ public class Game {
     public static int[] robotSTargetedX = new int[15];
     public static int[] robotSY = new int[15];
     public static int[] robotSTargetedY = new int[15];
+    
+    Trap[]traps = new Trap [100];
 
     void updateStatusPanel() { // skor değerlerinin güncellenip ekrana yazdırılması
 
@@ -158,6 +161,7 @@ public class Game {
         };
 
         int gametiming = 0;
+        int trapcounter = 0;
 
         cn.getTextWindow().setCursorPosition(25, 0);
         cn.getTextWindow().output("Welcome to the snake game");
@@ -236,13 +240,13 @@ public class Game {
 
                                     int lastmove = 4;
 
-                                    if (tempkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1)) {
+                                    if (tempkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1) && !gameField.isCrashedRobots(px, py - 1)) {
                                         randomy = 1;
-                                    } else if (tempkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1)) {
+                                    } else if (tempkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1) && !gameField.isCrashedRobots(px, py + 1)) {
                                         randomy = -1;
-                                    } else if (tempkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py)) {
+                                    } else if (tempkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py) && !gameField.isCrashedRobots(px - 1, py)) {
                                         randomx = -1;
-                                    } else if (tempkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py)) {
+                                    } else if (tempkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py) && !gameField.isCrashedRobots(px + 1, py)) {
                                         randomx = 1;
                                     } else {
 
@@ -270,7 +274,7 @@ public class Game {
                                                     break;
                                                 }
                                             }
-                                        } while (gameField.isWall(px + randomx, py + randomy));
+                                        } while (gameField.isWall(px + randomx, py + randomy) || gameField.isCrashedRobots(px + randomx, py + randomy));
                                     }
 
                                     int oldPx = px;
@@ -279,6 +283,9 @@ public class Game {
                                     collectTreasures(px + randomx, py + randomy);
                                     move(px + randomx, py + randomy, 0);
                                     GameField.map[oldPx][oldPy] = '=';
+                                    
+                                    traps[trapcounter] = new Trap(oldPx, oldPy, gametiming);                
+                                    trapcounter++;
                                 }
                             }
 
@@ -331,7 +338,6 @@ public class Game {
                         computersMove = false;
                     }
 
-
                     /*
         	  for(int i = 0; i < robotSCounter; i++) {
         		  if (currentTime - lastRobotSTime >= robotSInterval) {
@@ -355,28 +361,37 @@ public class Game {
                 	  robotSMove = false;
                 	  lastRobotSTime = currentTime;
         		  }
-        	  }
-*/
+        	  }*/
 
-
-                    if (gametiming % 20 == 0) { // 2 saniyede bir input Queue'dan eleman yerleştirilmesi
+                    if (gametiming % 20 == 0)  // 2 saniyede bir input Queue'dan eleman yerleştirilmesi
                         gameField.unloadInputQueue();
-                    }
+                    
 
-                    if (gametiming % 10 == 0) { // her saniyede time değişkeninin arttırılması
+                    if (gametiming % 10 == 0)  // her saniyede time değişkeninin arttırılması
                         time++;
-                    }
-
-                    if (gametiming % 1 == 0) {
-                        if (GameField.map[px + 1][py] == 'C' || GameField.map[px - 1][py] == 'C'
-                                || GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C') {
+                    
+                 
+                    if (GameField.map[px + 1][py] == 'C' || GameField.map[px - 1][py] == 'C'
+                     || GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C') 
                             life -= 30;
-                        } else if (GameField.map[px + 1][py] == 'S' || GameField.map[px - 1][py] == 'S'
-                                || GameField.map[px][py + 1] == 'S' || GameField.map[px][py - 1] == 'S') {
+                    else if (GameField.map[px + 1][py] == 'S' || GameField.map[px - 1][py] == 'S'
+                           || GameField.map[px][py + 1] == 'S' || GameField.map[px][py - 1] == 'S') 
                             life -= 1;
-                        }
-
-                    }
+                                                                    
+                    for (int k = 0; k < trapcounter; k++) {                  	
+                    	if (traps[k].getTime() != -1) {                   		
+                    		if(gametiming - traps[k].getTime() >= 100)                  			
+                    			traps[k].disappear();
+                    		                   		
+                    		else {                  			
+                    			if(traps[k].checkSnake()) {
+                               	    traps[k].boom();
+                                	playerscore += 200;
+                                	energy += 500;                               	
+                            	}
+                    		}                  		
+                    	}
+                    }  
 
                     try {
                         Thread.sleep(100); // 1 time unit
@@ -460,7 +475,6 @@ public class Game {
         return result;
     }
 
-
     public void scanForSnakes(char[][] array){
         for (int i = 0; i < 23; i++) {
             for (int j = 0; j < 55; j++) {
@@ -506,9 +520,7 @@ public class Game {
                 else if (!robotSMovingMode[i]){ //this means random move
                     randomMove(i);
                 }
-
             }
-
         }
     }
 
@@ -580,7 +592,6 @@ public class Game {
         robotSY[snake] = newY;
         GameField.map[newX][newY] = 'S';
     }
-
 
 
     private void randomMove(int snake) {
