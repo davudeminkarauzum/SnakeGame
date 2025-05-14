@@ -1,5 +1,3 @@
-
-
 import java.util.Scanner;
 import java.util.Random;
 import java.awt.event.KeyEvent;
@@ -8,7 +6,7 @@ import enigma.core.Enigma;
 
 public class Game {
     String choice;
-    enigma.console.Console cn = Enigma.getConsole("Snake Game", 80, 15);
+    enigma.console.Console cn = Enigma.getConsole("Snake Game", 180, 44);
 
     private Scanner scanner;
     static Random random = new Random();
@@ -37,18 +35,21 @@ public class Game {
     int life = 1000;
     int trap = 0;
     int playerscore = 0;
-    public static int robotSCounter = 0;
     int computerscore = 0;
 
     int px = 0, py = 0, cx = 0, cy = 0;
     Stack pathfinding = new Stack(500);
 
-    public static SingleLinkedList[] robotS = new SingleLinkedList[15];
-    public static int[] robotSX = new int[15];
-    public static int[] robotSTargetedX = new int[15];
-    public static int[] robotSY = new int[15];
-    public static int[] robotSTargetedY = new int[15];
-    
+    //Snakes constructors
+    public static int snakeCounter = 0;
+    public static Snakes snakes = new Snakes(15);
+    public static CircularQ snakesX = new CircularQ(15);
+    public static CircularQ snakeTargetX = new CircularQ(15);
+    public static CircularQ snakesY = new CircularQ(15);
+    public static CircularQ snakeTargetY = new CircularQ(15);
+    public static CircularQ snakeMoveMove = new CircularQ(15);
+    public static CircularQ randomMoveCounter = new CircularQ(15);
+
     Trap[]traps = new Trap [100];
 
     void updateStatusPanel() { // skor değerlerinin güncellenip ekrana yazdırılması
@@ -58,7 +59,7 @@ public class Game {
         String lifeText = "" + life;
         String trapText = "" + trap;
         String playerscoreText = "" + playerscore;
-        String sRobotText = "" + robotSCounter;
+        String sRobotText = "" + snakeCounter;
         String computerscoreText = "" + computerscore;
 
         writeToMap(5, 66, timeText);
@@ -122,12 +123,9 @@ public class Game {
             if (energy > 0) { //Spending energy
                 energy--;
             }
-        } else if (robotSMove) {
-            GameField.map[robotSX[i]][robotSY[i]] = ' ';
-            robotSX[i] = newX;
-            robotSY[i] = newY;
-            GameField.map[robotSX[i]][robotSY[i]] = 'S';
-        } else if (computersMove) {
+        }
+
+        else if (computersMove) {
             GameField.map[cx][cy] = ' ';
             cx = newX;
             cy = newY;
@@ -196,11 +194,10 @@ public class Game {
                 for (int i = 0; i < 30; i++) // oyunun başında tahtaya input queue'dan 30 element boşalt
                     gameField.unloadInputQueue();
 
-                scanForSnakes(GameField.map); //this function checks all map and if there is an S it creates new Snake
+              //  scanForSnakes(GameField.map); //this function checks all map and if there is an S it creates new Snake
 
-                for (int i = 0; i < robotSCounter; i++) {
-                    chooseTarget(i);
-                }
+               // chooseTargetForAll(); //this function chooses targets for every snakes
+
 
                 while (true) { //main loop of the game
 
@@ -284,8 +281,8 @@ public class Game {
                                     collectTreasures(px + randomx, py + randomy);
                                     move(px + randomx, py + randomy, 0);
                                     GameField.map[oldPx][oldPy] = '=';
-                                    
-                                    traps[trapcounter] = new Trap(oldPx, oldPy, gametiming);                
+
+                                    traps[trapcounter] = new Trap(oldPx, oldPy, gametiming);
                                     trapcounter++;
                                 }
                             }
@@ -339,60 +336,35 @@ public class Game {
                         computersMove = false;
                     }
 
-                    /*
-        	  for(int i = 0; i < robotSCounter; i++) {
-        		  if (currentTime - lastRobotSTime >= robotSInterval) {
-        			  robotSMove = true;
-        			  if(robotSTargetedX[i] == robotSX[i] && robotSTargetedY[i] == robotSY[i]) { // If this S robot would arrived the target
-        				  while(!(GameField.map[robotSTargetedX[i]][robotSTargetedY[i]] == '1' ||
-        					    GameField.map[robotSTargetedX[i]][robotSTargetedY[i]] == '2' ||
-        						GameField.map[robotSTargetedX[i]][robotSTargetedY[i]] == '3')) { //Targeting treasure randomly
-        					  robotSTargetedX[i] = random.nextInt(1, 22);
-        					  robotSTargetedY[i] = random.nextInt(1, 55);
-        				  }
-        			  } else {
-                		  if(gameField.isStuck(robotSX[i], robotSY[i])) { //Random moving mode
-                			  while(gameField.isStuck(robotSX[i], robotSY[i])) {
-                				  int probability = random.nextInt(100) + 1;
-                			  }
-                		  } else { //Targeted moving mode
-
-                		  }
-        			  }
-                	  robotSMove = false;
-                	  lastRobotSTime = currentTime;
-        		  }
-        	  }*/
-
                     if (gametiming % 20 == 0)  // 2 saniyede bir input Queue'dan eleman yerleştirilmesi
                         gameField.unloadInputQueue();
-                    
+
 
                     if (gametiming % 10 == 0)  // her saniyede time değişkeninin arttırılması
                         time++;
-                    
-                 
+
+
                     if (GameField.map[px + 1][py] == 'C' || GameField.map[px - 1][py] == 'C'
-                     || GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C') 
-                            life -= 30;
+                            || GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C')
+                        life -= 30;
                     else if (GameField.map[px + 1][py] == 'S' || GameField.map[px - 1][py] == 'S'
-                           || GameField.map[px][py + 1] == 'S' || GameField.map[px][py - 1] == 'S') 
-                            life -= 1;
-                                                                    
-                    for (int k = 0; k < trapcounter; k++) {                  	
-                    	if (traps[k].getTime() != -1) {                   		
-                    		if(gametiming - traps[k].getTime() >= 100)                  			
-                    			traps[k].disappear();
-                    		                   		
-                    		else {                  			
-                    			if(traps[k].checkSnake()) {
-                               	    traps[k].boom();
-                                	playerscore += 200;
-                                	energy += 500;                               	
-                            	}
-                    		}                  		
-                    	}
-                    }  
+                            || GameField.map[px][py + 1] == 'S' || GameField.map[px][py - 1] == 'S')
+                        life -= 1;
+
+                    for (int k = 0; k < trapcounter; k++) {
+                        if (traps[k].getTime() != -1) {
+                            if(gametiming - traps[k].getTime() >= 100)
+                                traps[k].disappear();
+
+                            else {
+                                if(traps[k].checkSnake()) {
+                                    traps[k].boom();
+                                    playerscore += 200;
+                                    energy += 500;
+                                }
+                            }
+                        }
+                    }
 
                     try {
                         Thread.sleep(100); // 1 time unit
@@ -427,11 +399,11 @@ public class Game {
 
         int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}; //Right, Down, Left, Up
 
-        Stack[] bfsGraph = new Stack[map.length * map[0].length]; 
+        Stack[] bfsGraph = new Stack[map.length * map[0].length];
         int depth = 0, x = 0, y = 0;
 
         while (!stack.isEmpty() && !(x == targetedX && y == targetedY)) {
-            Stack currentLevelStack = new Stack(1000); 
+            Stack currentLevelStack = new Stack(1000);
             while (!stack.isEmpty()) {
                 int[] current = (int[]) stack.pop();
                 x = current[0];     y = current[1];
@@ -462,196 +434,265 @@ public class Game {
                 result.push("L");
             } else if (targetedX - tempX == 1 && targetedY - tempY == 0) {
                 result.push("D");
-            } else if (targetedX - tempX == -1 && targetedY - tempY == 0) { 
+            } else if (targetedX - tempX == -1 && targetedY - tempY == 0) {
                 result.push("U");
             }
-            
+
             targetedX = tempX;     targetedY = tempY;
             GameField.map[targetedX][targetedY] = '.';
         }
-        
+
         return result;
     }
 
 
-    public void scanForSnakes(char[][] array){
+    public void scanForSnakes(char[][] array) {
         for (int i = 0; i < 23; i++) {
             for (int j = 0; j < 55; j++) {
-                if(array[i][j] == 'S'){
-                    robotSX[robotSCounter] = i;
-                    robotSY[robotSCounter] = j;
-                    robotS[robotSCounter] = new SingleLinkedList();
-                    robotSMovingMode[robotSCounter] = true;
-                    robotSCounter++;
+                if (array[i][j] == 'S') {
+                    addNewSnake(i, j);
+                    newAddedTarget();
                 }
             }
         }
     }
 
-    public void chooseTarget(int SnakeNumber){
-        int snakeX = robotSX[SnakeNumber];
-        int snakeY = robotSY[SnakeNumber];
-        int targetX; int targetY;
+    //this functions adds a new snake and hold coordinates at different queues
+    public static void addNewSnake(int i , int j) {
+        SingleLinkedList newSnake = new SingleLinkedList();
+        snakes.enqueue(newSnake);
+        snakesX.enqueue(i);
+        snakesY.enqueue(j);
+        snakeMoveMove.enqueue(true);
+        snakeCounter++;
+        randomMoveCounter.enqueue(0);
+    }
+
+    public static void newAddedTarget(){
+        int tX, tY;
         boolean isAvaible = false;
+
         do {
-            targetX = random.nextInt(23);
-            targetY = random.nextInt(55);
-            if (GameField.map[targetX][targetY] == '1' || GameField.map[targetX][targetY] == '2' ||
-                    GameField.map[targetX][targetY] == '3'){
-                robotSTargetedX[SnakeNumber] = targetX;
-                robotSTargetedY[SnakeNumber] = targetY;
-                robotSMovingMode[SnakeNumber] = true;
+            tX = random.nextInt(23);
+            tY = random.nextInt(55);
+            if (GameField.map[tX][tY] == '1' || GameField.map[tX][tY] == '2' ||
+                    GameField.map[tX][tY] == '3') {
                 isAvaible = true;
             }
         }while (!isAvaible);
+        snakeTargetX.enqueue(tX);
+        snakeTargetY.enqueue(tY);
     }
 
     public void moveSnakes() {
-        for (int i = 0; i < robotSCounter; i++) {
+        int sx, sy, tx, ty;
+        for (int i = 0; i < snakeCounter; i++) {
+            sx = (int) snakesX.peek();
+            sy = (int) snakesY.peek();
+            tx = (int) snakeTargetX.peek();
+            ty = (int) snakeTargetY.peek();
 
-            // if it arrived target, choose new target
-            if (robotSX[i] == robotSTargetedX[i] && robotSY[i] == robotSTargetedY[i]) {
+            //if it arrived the target, choose new target
+            if (sx == tx && sy == ty) {
                 chooseNewTarget(i);
-            } else {
-                if (robotSMovingMode[i]) { //this means moving mode is targeted mode
-                    targetedMove(i);
-                }
-                else if (!robotSMovingMode[i]){ //this means random move
-                    randomMove(i);
-                }
             }
+            if ((boolean) snakeMoveMove.peek()) {
+                targetedMove(i);
+            } else {
+                randomMove(i);
+            }
+
+            snakes.enqueue(snakes.dequeue());
+            snakesX.enqueue(snakesX.dequeue());
+            snakesY.enqueue(snakesY.dequeue());
+            snakeTargetX.enqueue(snakeTargetX.dequeue());
+            snakeTargetY.enqueue(snakeTargetY.dequeue());
+            snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+            randomMoveCounter.enqueue(randomMoveCounter.dequeue());
         }
     }
 
     private void chooseNewTarget(int index) {
-        Random rand = new Random();
-
-        int tx, ty;
-        do {
-            tx = rand.nextInt(23);
-            ty = rand.nextInt(55);
-        } while (GameField.map[tx][ty] != '1' &&
-                GameField.map[tx][ty] != '2' &&
-                GameField.map[tx][ty] == '3');
-
-        robotSTargetedX[index] = tx;
-        robotSTargetedY[index] = ty;
-    }
-
-    public void targetedMove(int snake) {
-        int tx = robotSTargetedX[snake];
-        int ty = robotSTargetedY[snake];
-        int sx = robotSX[snake];
-        int sy = robotSY[snake];
-        int newX = sx;
-        int newY = sy;
-        if(Math.abs(sx - tx) >= Math.abs(sy - ty)){ //means up or dowm
-            if (sx < tx){ //means down
-                if (GameField.map[sx + 1][sy] == '#' || GameField.map[sx + 1][sy] == 'C' ||
-                        GameField.map[sx + 1][sy] == 'P' || GameField.map[sx + 1][sy] == '@') { //this statement checks for obstacles
-                    robotSMovingMode[snake] = false;
-                }else {
-                    newX++;
-                }
-            }
-            else if (sx > tx){ //means left
-                if (GameField.map[sx - 1][sy] == '#' || GameField.map[sx - 1][sy] == 'C' ||
-                        GameField.map[sx - 1][sy] == 'P' || GameField.map[sx - 1][sy] == '@') {
-                    robotSMovingMode[snake] = false;
-                }else {
-                    newX--;
-                }
-            }
-        }
-        else{ //means up or down
-            if (sy < ty){ //means down
-                if (GameField.map[sx][sy + 1] == '#' || GameField.map[sx][sy + 1] == 'C' ||
-                        GameField.map[sx][sy + 1] == 'P' || GameField.map[sx][sy + 1] == '@') {
-                    robotSMovingMode[snake] = false;
-                }else {
-                    newY++;
-                }
-            }
-            else if (sy > ty){ // means up
-                if (GameField.map[sx][sy - 1] == '#' || GameField.map[sx][sy - 1] == 'C' ||
-                        GameField.map[sx][sy - 1] == 'P' || GameField.map[sx][sy - 1] == '@') {
-                    robotSMovingMode[snake] = false;
-                }else {
-                    newY--;
-                }
-            }
-        }
-
-        if (!robotSMovingMode[snake]){
-            randomMove(snake);
-        }
-
-        GameField.map[sx][sy] = ' ';
-        robotSX[snake] = newX;
-        robotSY[snake] = newY;
-        GameField.map[newX][newY] = 'S';
-    }
-
-
-    private void randomMove(int snake) {
-        int direction;
-        boolean isMoved = false;
-        int sx = robotSX[snake];
-        int sy = robotSY[snake];
-        int newX = sx; int newY = sy;
+        int tXnew, tYnew;
 
         do {
-            direction = random.nextInt(4);
+            tXnew = random.nextInt(23);
+            tYnew = random.nextInt(55);
+        }while (GameField.map[tXnew][tYnew] != '1' && GameField.map[tXnew][tYnew] != '2' &&
+                GameField.map[tXnew][tYnew] != '3');
 
-            if (direction == 0) { //means to up
-                if (GameField.map[sx - 1][sy] != '#') {
-                    isMoved = true;
-                    newX--;
-                    randomMoveCounterS[snake]++;
-                }
-            }
-            else if (direction == 1) { //means to down
-                if (GameField.map[sx + 1][sy] != '#') {
-                    isMoved = true;
-                    newX++;
-                    randomMoveCounterS[snake]++;
-                }
-            }
-            else if (direction == 2) { //means to left
-                if (GameField.map[sx][sy - 1] != '#') {
-                    isMoved = true;
-                    newY--;
-                    randomMoveCounterS[snake]++;
-                }
-            }
-            else { //means to right
-                if (GameField.map[sx][sy + 1] != '#') {
-                    isMoved = true;
-                    newY++;
-                    randomMoveCounterS[snake]++;
-                }
-            }
-        }while (!isMoved);
+        //removing old values
+        snakeTargetX.dequeue();
+        snakeTargetY.dequeue();
+        snakeMoveMove.dequeue();
 
-            GameField.map[sx][sy] = ' ';
-            robotSX[snake] = newX;
-            robotSY[snake] = newY;
-            GameField.map[newX][newY] = 'S';
+        snakeTargetX.enqueue(tXnew);
+        snakeTargetY.enqueue(tYnew);
+        snakeMoveMove.enqueue(true);
 
-            if (randomMoveCounterS[snake] >= 25){
-                randomMoveCounterS[snake] = 0;
-                robotSMovingMode[snake] = true;
+        for (int j = 0; j < snakeCounter - (index + 1); j++) {
+            snakeTargetX.enqueue(snakeTargetX.dequeue());
+            snakeTargetY.enqueue(snakeTargetY.dequeue());
+            snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+        }
+    }
+
+    public void targetedMove(int index) {
+        int sX = (int)snakesX.peek();
+        int sY = (int)snakesY.peek();
+        int tX = (int)snakeTargetX.peek();
+        int tY = (int)snakeTargetY.peek();
+        int diffX = tX - sX;
+        int diffY = tY - sY;
+        boolean moved = false;
+
+        if (!moved &&  diffY < 0) { //up
+            if (sX - 1 >= 0 && GameField.map[sX - 1][sY] != '#' &&
+                    GameField.map[sX - 1][sY] != 'P' &&
+                    GameField.map[sX - 1][sY] != 'C'){
+                GameField.map[sX][sY] = ' ';
+                GameField.map[sX - 1][sY] = 'S';
+                moved = true;
+                snakesX.dequeue();
+                snakesX.enqueue(sX - 1);
+                snakesY.enqueue(snakesY.dequeue());
+                snakes.enqueue(snakes.dequeue());
+                snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+            }
+        }
+        if (!moved && diffY > 0) { //down
+            if(sX + 1 < 23 && GameField.map[sX + 1][sY] != '#' &&
+                    GameField.map[sX + 1][sY] != 'P' &&
+                    GameField.map[sX + 1][sY] != 'C'){
+                GameField.map[sX][sY] = ' ';
+                GameField.map[sX + 1][sY] = ' ';
+                moved = true;
+                snakesX.dequeue();
+                snakesX.enqueue(sX + 1);
+                snakesY.enqueue(snakesY.dequeue());
+                snakes.enqueue(snakes.dequeue());
+                snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+            }
+        }
+        if (!moved && diffX < 0){ //left
+            if (sY - 1 < 55 && GameField.map[sX][sY - 1] != '#' &&
+                    GameField.map[sX][sY - 1] != 'P' &&
+                    GameField.map[sX][sY - 1] != 'C'){
+                GameField.map[sX][sY] = ' ';
+                GameField.map[sX][sY - 1] = 'S';
+                moved = true;
+                snakesY.dequeue();
+                snakesY.enqueue(sY - 1);
+                snakesX.enqueue(snakesX.dequeue());
+                snakes.enqueue(snakes.dequeue());
+                snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+            }
+        }
+        if (!moved && diffX > 0){ //right
+            if (sX + 1 >= 0 && GameField.map[sX + 1][sY] != '#' &&
+                    GameField.map[sX + 1][sY] != 'P' &&
+                    GameField.map[sX + 1][sY] != 'C') {
+                GameField.map[sX][sY] = ' ';
+                GameField.map[sX][sY + 1] = ' ';
+                moved = true;
+                snakesY.dequeue();
+                snakesY.enqueue(sY + 1);
+                snakesX.enqueue(snakesX.dequeue());
+                snakes.enqueue(snakes.dequeue());
+                snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+            }
+        }
+
+        //we check for if it moved or not
+        if (!moved){
+            snakesX.enqueue(snakesX.dequeue());
+            snakesY.enqueue(snakesY.dequeue());
+            snakeMoveMove.dequeue();
+            snakeMoveMove.enqueue(false);
+        }
+
+            for (int i = 0; i < snakeCounter - (index + 1); i++) {
+                snakesX.enqueue(snakesX.dequeue());
+                snakesY.enqueue(snakesY.dequeue());
+                snakeMoveMove.enqueue(snakeMoveMove.dequeue());
             }
     }
-    public static boolean[] robotSMovingMode = new boolean[15];
-    public static int[] randomMoveCounterS = new int[15];
 
-    public static void addNewSnake(int i , int j){
-        robotSX[robotSCounter] = i;
-        robotSY[robotSCounter] = j;
-        robotS[robotSCounter] = new SingleLinkedList();
-        robotSMovingMode[robotSCounter] = true;
-        robotSCounter++;
+
+    private void randomMove(int index) {
+        int sX, sY;
+        sX = (int)snakesX.peek();
+        sY = (int)snakesY.peek();
+        boolean moved = false;
+        int attemps = 0;
+        int randomCountered;
+
+        while (!moved && attemps < 5){
+            int dir = random.nextInt(4);
+
+            if (dir == 0) { //means up
+                if (sX - 1 >= 0 &&  GameField.map[sX - 1][sY] != '#' && GameField.map[sX - 1][sY] != 'C' &&
+                        GameField.map[sX - 1][sY] != 'P'){
+                    GameField.map[sX][sY] = ' ';
+                    GameField.map[sX - 1][sY] = 'S';
+                    moved = true;
+                    snakesX.dequeue();
+                    snakesX.enqueue(sX - 1);
+                    snakesY.enqueue(snakesY.dequeue());
+                }
+            }
+            else if (dir == 1) { //means down
+                if (sX + 1 < 23 &&  GameField.map[sX + 1][sY] != '#' && GameField.map[sX + 1][sY] != 'C' &&
+                        GameField.map[sX + 1][sY] != 'P') {
+                    GameField.map[sX][sY] = ' ';
+                    GameField.map[sX + 1][sY] = 'S';
+                    moved = true;
+                    snakesX.dequeue();
+                    snakesX.enqueue(sX + 1);
+                    snakesY.enqueue(snakesY.dequeue());
+                }
+            }
+            else if (dir == 2) { //means left
+                if (sY - 1 > 0 && GameField.map[sX][sY - 1] != '#' && GameField.map[sX][sY - 1] != 'C' &&
+                        GameField.map[sX][sY - 1] != 'P'){
+                    GameField.map[sX][sY] = ' ';
+                    GameField.map[sX][sY - 1] = 'S';
+                    moved = true;
+                    snakesY.dequeue();
+                    snakesY.enqueue(sY - 1);
+                    snakesX.enqueue(snakesX.dequeue());
+                }
+            }
+            else if (dir == 3){ //means right
+                if (sY + 1 < 55 && GameField.map[sX][sY + 1] != '#' && GameField.map[sX][sY + 1] != 'C' &&
+                        GameField.map[sX][sY + 1] != 'P'){
+                    GameField.map[sX][sY] = ' ';
+                    GameField.map[sX][sY + 1] = 'S';
+                    moved = true;
+                    snakesY.dequeue();
+                    snakesY.enqueue(sY + 1);
+                    snakesX.enqueue(snakesX.dequeue());
+                }
+            }
+            attemps++;
+        }
+        randomCountered = (int)randomMoveCounter.peek();
+        randomCountered++;
+
+        if (randomCountered > 25){
+            randomCountered = 0;
+            snakeMoveMove.dequeue();
+            snakeMoveMove.enqueue(true);
+        }
+        randomMoveCounter.dequeue();
+        randomMoveCounter.enqueue(randomCountered);
+
+        for (int i = 0; i < snakeCounter - (index + 1); i++) {
+            snakesX.enqueue(snakesX.dequeue());
+            snakesY.enqueue(snakesY.dequeue());
+            snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+            randomMoveCounter.enqueue(randomMoveCounter.dequeue());
+        }
     }
 
 }
