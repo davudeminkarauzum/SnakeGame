@@ -2,30 +2,20 @@ public class SingleLinkedList {
 
 	Node head;
 	
-	public void add(Object data) {
+	public void eating(Object input) {
 		if(head == null) {
-			head = new Node(data);
+			head = new Node(input);
 		} else {
-			Node temp = head;
-			while(temp.getLink() != null) {
-				temp = (Node) temp.getLink();
+			Node temp = head, newnode = new Node(input);
+			temp.getLink();
+			
+			if(temp != null) {
+				newnode.setLink(temp);
 			}
-			Node toAdd = new Node(data);
-			temp.setLink(toAdd);
+			head.setLink(newnode);
 		}
 	}
-	
-	public void display() {
-		if(head == null) {
-			System.out.println("The list is empty.");
-		} else {
-			Node temp = head;
-			while(temp != null) {
-				System.out.print(temp.getData() + " ");
-				temp = (Node) temp.getLink();
-			}
-		}
-	}
+
 	
 	public int size() {
 		if(head == null) {
@@ -40,4 +30,5 @@ public class SingleLinkedList {
 			return calculator;
 		}
 	}
+	
 }
