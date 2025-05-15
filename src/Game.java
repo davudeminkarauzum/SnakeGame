@@ -11,10 +11,6 @@ public class Game {
     private Scanner scanner;
     static Random random = new Random();
 
-    boolean playersMove = false;
-    boolean computersMove = false;
-    boolean robotSMove = false;
-
     public KeyListener klis;
 
     public int keypr; // key pressed?
@@ -34,11 +30,12 @@ public class Game {
     int energy = 500;
     int life = 1000;
     int trap = 0;
-    int playerscore = 0;
-    int computerscore = 0;
 
-    int px = 0, py = 0, cx = 0, cy = 0;
+    //Variables for player and C robot
+    boolean playersMove = false,           computersMove = false;
+    int px = 0, py = 0, playerscore = 0,   cx = 0, cy = 0, computerscore = 0;
     Stack pathfinding = new Stack(500);
+    boolean intersectsPath = false;
 
     //Snakes constructors
     public static int snakeCounter = 0;
@@ -116,7 +113,20 @@ public class Game {
 
     void move(int newX, int newY) {
         if (playersMove) {
-            GameField.map[px][py] = ' ';
+        	//In case of crossing C robot's path
+        	if(intersectsPath) {
+        		GameField.map[px][py] = '.';
+        	} else {            
+        		GameField.map[px][py] = ' ';  
+        		intersectsPath = false;
+        	}
+        	
+        	if(GameField.map[newX][newY] == '.') {
+        		intersectsPath = true;
+        	} else {
+        		intersectsPath = false;
+        	}
+        	
             px = newX;
             py = newY;
             GameField.map[px][py] = 'P';
@@ -706,5 +716,4 @@ public class Game {
             snakeTargetY.enqueue(snakeTargetY.dequeue());
         }
     }
-
 }
