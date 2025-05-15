@@ -43,12 +43,12 @@ public class Game {
     //Snakes constructors
     public static int snakeCounter = 0;
     public static Snakes snakes = new Snakes(15);
-    public static CircularQ snakesX = new CircularQ(15);
-    public static CircularQ snakeTargetX = new CircularQ(15);
-    public static CircularQ snakesY = new CircularQ(15);
-    public static CircularQ snakeTargetY = new CircularQ(15);
-    public static CircularQ snakeMoveMove = new CircularQ(15);
-    public static CircularQ randomMoveCounter = new CircularQ(15);
+    public static CircularQueue snakesX = new CircularQueue(15);
+    public static CircularQueue snakeTargetX = new CircularQueue(15);
+    public static CircularQueue snakesY = new CircularQueue(15);
+    public static CircularQueue snakeTargetY = new CircularQueue(15);
+    public static CircularQueue snakeMoveMove = new CircularQueue(15);
+    public static CircularQueue randomMoveCounter = new CircularQueue(15);
 
     Trap[]traps = new Trap [100];
 
