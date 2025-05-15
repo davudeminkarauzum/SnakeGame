@@ -194,11 +194,6 @@ public class Game {
                 for (int i = 0; i < 30; i++) // oyunun başında tahtaya input queue'dan 30 element boşalt
                     gameField.unloadInputQueue();
 
-              //  scanForSnakes(GameField.map); //this function checks all map and if there is an S it creates new Snake
-
-               // chooseTargetForAll(); //this function chooses targets for every snakes
-
-
                 while (true) { //main loop of the game
 
                     updateGameBoard();
@@ -494,12 +489,12 @@ public class Game {
 
             //if it arrived the target, choose new target
             if (sx == tx && sy == ty) {
-                chooseNewTarget(i);
+                chooseNewTarget();
             }
             if ((boolean) snakeMoveMove.peek()) {
-                targetedMove(i);
+                targetedMove();
             } else {
-                randomMove(i);
+                randomMove();
             }
 
             snakes.enqueue(snakes.dequeue());
@@ -512,14 +507,17 @@ public class Game {
         }
     }
 
-    private void chooseNewTarget(int index) {
+    private void chooseNewTarget() {
         int tXnew, tYnew;
-
+        boolean isAvaible = false;
         do {
             tXnew = random.nextInt(23);
             tYnew = random.nextInt(55);
-        }while (GameField.map[tXnew][tYnew] != '1' && GameField.map[tXnew][tYnew] != '2' &&
-                GameField.map[tXnew][tYnew] != '3');
+            if (GameField.map[tXnew][tYnew] == '1' || GameField.map[tXnew][tYnew] == '2' ||
+                    GameField.map[tXnew][tYnew] == '3') {
+                isAvaible = true;
+            }
+        }while (!isAvaible);
 
         //removing old values
         snakeTargetX.dequeue();
@@ -529,15 +527,24 @@ public class Game {
         snakeTargetX.enqueue(tXnew);
         snakeTargetY.enqueue(tYnew);
         snakeMoveMove.enqueue(true);
+        randomMoveCounter.dequeue();
+        randomMoveCounter.enqueue(0);
+        snakes.enqueue(snakes.dequeue());
+        snakesX.enqueue(snakesX.dequeue());
+        snakesY.enqueue(snakesY.dequeue());
 
-        for (int j = 0; j < snakeCounter - (index + 1); j++) {
+        for (int j = 0; j < snakeCounter - 1; j++) {
             snakeTargetX.enqueue(snakeTargetX.dequeue());
             snakeTargetY.enqueue(snakeTargetY.dequeue());
             snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+            snakesX.enqueue(snakesX.dequeue());
+            snakesY.enqueue(snakesY.dequeue());
+            randomMoveCounter.enqueue(randomMoveCounter.dequeue());
+            snakes.enqueue(snakes.dequeue());
         }
     }
 
-    public void targetedMove(int index) {
+    public void targetedMove() {
         int sX = (int)snakesX.peek();
         int sY = (int)snakesY.peek();
         int tX = (int)snakeTargetX.peek();
@@ -546,7 +553,7 @@ public class Game {
         int diffY = tY - sY;
         boolean moved = false;
 
-        if (!moved &&  diffY < 0) { //up
+        if (!moved &&  diffX < 0) { //up
             if (sX - 1 >= 0 && GameField.map[sX - 1][sY] != '#' &&
                     GameField.map[sX - 1][sY] != 'P' &&
                     GameField.map[sX - 1][sY] != 'C'){
@@ -556,11 +563,15 @@ public class Game {
                 snakesX.dequeue();
                 snakesX.enqueue(sX - 1);
                 snakesY.enqueue(snakesY.dequeue());
+
                 snakes.enqueue(snakes.dequeue());
                 snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+                snakeTargetX.enqueue(snakeTargetX.dequeue());
+                snakeTargetY.enqueue(snakeTargetY.dequeue());
+                randomMoveCounter.enqueue(randomMoveCounter.dequeue());
             }
         }
-        if (!moved && diffY > 0) { //down
+        if (!moved && diffX > 0) { //down
             if(sX + 1 < 23 && GameField.map[sX + 1][sY] != '#' &&
                     GameField.map[sX + 1][sY] != 'P' &&
                     GameField.map[sX + 1][sY] != 'C'){
@@ -570,11 +581,15 @@ public class Game {
                 snakesX.dequeue();
                 snakesX.enqueue(sX + 1);
                 snakesY.enqueue(snakesY.dequeue());
+
                 snakes.enqueue(snakes.dequeue());
                 snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+                snakeTargetX.enqueue(snakeTargetX.dequeue());
+                snakeTargetY.enqueue(snakeTargetY.dequeue());
+                randomMoveCounter.enqueue(randomMoveCounter.dequeue());
             }
         }
-        if (!moved && diffX < 0){ //left
+        if (!moved && diffY < 0){ //left
             if (sY - 1 < 55 && GameField.map[sX][sY - 1] != '#' &&
                     GameField.map[sX][sY - 1] != 'P' &&
                     GameField.map[sX][sY - 1] != 'C'){
@@ -584,42 +599,59 @@ public class Game {
                 snakesY.dequeue();
                 snakesY.enqueue(sY - 1);
                 snakesX.enqueue(snakesX.dequeue());
+
                 snakes.enqueue(snakes.dequeue());
                 snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+                snakeTargetX.enqueue(snakeTargetX.dequeue());
+                snakeTargetY.enqueue(snakeTargetY.dequeue());
+                randomMoveCounter.enqueue(randomMoveCounter.dequeue());
             }
         }
-        if (!moved && diffX > 0){ //right
-            if (sX + 1 >= 0 && GameField.map[sX + 1][sY] != '#' &&
-                    GameField.map[sX + 1][sY] != 'P' &&
-                    GameField.map[sX + 1][sY] != 'C') {
+        if (!moved && diffY > 0){ //right
+            if (sX + 1 >= 0 && GameField.map[sX][sY + 1] != '#' &&
+                    GameField.map[sX][sY + 1] != 'P' &&
+                    GameField.map[sX][sY + 1] != 'C') {
                 GameField.map[sX][sY] = ' ';
                 GameField.map[sX][sY + 1] = ' ';
                 moved = true;
                 snakesY.dequeue();
                 snakesY.enqueue(sY + 1);
                 snakesX.enqueue(snakesX.dequeue());
+                
                 snakes.enqueue(snakes.dequeue());
                 snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+                snakeTargetX.enqueue(snakeTargetX.dequeue());
+                snakeTargetY.enqueue(snakeTargetY.dequeue());
+                randomMoveCounter.enqueue(randomMoveCounter.dequeue());
             }
         }
 
         //we check for if it moved or not
         if (!moved){
+            snakes.enqueue(snakes.dequeue());
             snakesX.enqueue(snakesX.dequeue());
             snakesY.enqueue(snakesY.dequeue());
             snakeMoveMove.dequeue();
             snakeMoveMove.enqueue(false);
+            snakeTargetX.enqueue(snakeTargetX.dequeue());
+            snakeTargetY.enqueue(snakeTargetY.dequeue());
+            randomMoveCounter.enqueue(randomMoveCounter.dequeue());
         }
 
-            for (int i = 0; i < snakeCounter - (index + 1); i++) {
+
+            for (int i = 0; i < snakeCounter - 1; i++) {
                 snakesX.enqueue(snakesX.dequeue());
                 snakesY.enqueue(snakesY.dequeue());
                 snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+                snakeTargetX.enqueue(snakeTargetX.dequeue());
+                snakeTargetY.enqueue(snakeTargetY.dequeue());
+                randomMoveCounter.enqueue(randomMoveCounter.dequeue());
+                snakes.enqueue(snakes.dequeue());
             }
     }
 
 
-    private void randomMove(int index) {
+    private void randomMove() {
         int sX, sY;
         sX = (int)snakesX.peek();
         sY = (int)snakesY.peek();
@@ -684,14 +716,24 @@ public class Game {
             snakeMoveMove.dequeue();
             snakeMoveMove.enqueue(true);
         }
+        else
+            snakeMoveMove.enqueue(snakeMoveMove.dequeue());
+
         randomMoveCounter.dequeue();
         randomMoveCounter.enqueue(randomCountered);
 
-        for (int i = 0; i < snakeCounter - (index + 1); i++) {
+        snakes.enqueue(snakes.dequeue());
+        snakeTargetX.enqueue(snakeTargetX.dequeue());
+        snakeTargetY.enqueue(snakeTargetY.dequeue());
+
+        for (int i = 0; i < snakeCounter - 1; i++) {
             snakesX.enqueue(snakesX.dequeue());
             snakesY.enqueue(snakesY.dequeue());
             snakeMoveMove.enqueue(snakeMoveMove.dequeue());
             randomMoveCounter.enqueue(randomMoveCounter.dequeue());
+            snakes.enqueue(snakes.dequeue());
+            snakeTargetX.enqueue(snakeTargetX.dequeue());
+            snakeTargetY.enqueue(snakeTargetY.dequeue());
         }
     }
 
