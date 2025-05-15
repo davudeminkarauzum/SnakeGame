@@ -1,4 +1,7 @@
 import java.util.Scanner;
+
+import javax.lang.model.util.ElementScanner14;
+
 import java.util.Random;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -61,17 +64,28 @@ public class Game {
 
         int gametiming = 0;
         int trapcounter = 0;
+        do {
+            cn.getTextWindow().setCursorPosition(25, 0);
+            cn.getTextWindow().output("Welcome to the snake game");
+            cn.getTextWindow().setCursorPosition(25, 1);
+            cn.getTextWindow().output("To start the game press number 1");
+            cn.getTextWindow().setCursorPosition(25, 2);
+            cn.getTextWindow().output("To exit the game press number 2\n");
 
-        cn.getTextWindow().setCursorPosition(25, 0);
-        cn.getTextWindow().output("Welcome to the snake game");
-        cn.getTextWindow().setCursorPosition(25, 1);
-        cn.getTextWindow().output("To start the game press number 1");
-        cn.getTextWindow().setCursorPosition(25, 2);
-        cn.getTextWindow().output("To exit the game press number 2\n");
-
-        cn.getTextWindow().setCursorPosition(25, 3);
-        choice = scanner.nextLine();
-
+            cn.getTextWindow().setCursorPosition(25, 3);
+            choice = scanner.nextLine();
+            if (!choice.equals("1") && !choice.equals("2")) {
+                cn.getTextWindow().setCursorPosition(25, 4);
+                cn.getTextWindow().output("Please enter 1 or 2!\n");
+            }
+        } while (!choice.equals("1") && !choice.equals("2"));
+         
+        if (choice.equals("2")) {
+        // Konsolu kapat ve uygulamayı sonlandır
+        cn.getTextWindow().setCursorPosition(25, 4);
+        cn.getTextWindow().output("Exiting...");  
+        System.exit(0);
+        }
         if (choice.equals("1")) {
             clearScreen();
             GameField gameField = new GameField(cn);
@@ -80,12 +94,12 @@ public class Game {
 
                 while (!(GameField.map[px][py] == ' ' && GameField.map[cx][cy] == ' ')) {
                     if (GameField.map[px][py] != ' ') {
-                        px = random.nextInt(1, 22);
-                        py = random.nextInt(1, 55);
+                        px = random.nextInt(21) + 1;
+                        py = random.nextInt(54) + 1;
                     }
                     if (GameField.map[cx][cy] != ' ') {
-                        cx = random.nextInt(1, 22);
-                        cy = random.nextInt(1, 55);
+                        cx = random.nextInt(21) + 1;
+                        cy = random.nextInt(54) + 1;
                     }
                 }
                 GameField.map[px][py] = 'P';
@@ -275,9 +289,10 @@ public class Game {
                 }
             }
         }
+
     }
 
-     public void clearScreen() { // ekranın temizlenmesi
+    public void clearScreen() { // ekranın temizlenmesi
         for (int i = 0; i < 80; i++) {
             for (int z = 0; z < 30; z++) {
                 cn.getTextWindow().output(i, z, ' ');
@@ -285,7 +300,7 @@ public class Game {
         }
     }
 
-       public void updateGameBoard() { // tahtayı güncelleyen fonksiyon
+    public void updateGameBoard() { // tahtayı güncelleyen fonksiyon
         updateStatusPanel(); // değerlerin güncellenmesi
         clearScreen(); // ekranın temizlenmesi
         cn.getTextWindow().setCursorPosition(0, 0); // cursoru ayarla
@@ -299,8 +314,8 @@ public class Game {
                 map[targetedX][targetedY] == '2' ||
                 map[targetedX][targetedY] == '3' ||
                 map[targetedX][targetedY] == '@')) {
-            targetedX = random.nextInt(1, 23);
-            targetedY = random.nextInt(1, 55);
+            targetedX = random.nextInt(22) + 1;
+            targetedY = random.nextInt(54) + 1;
         }
 
         boolean[][] visited = new boolean[23][55];
@@ -399,7 +414,6 @@ public class Game {
             randomMoveCounter.enqueue(randomMoveCounter.dequeue());
         }
     }
-    
 
     public void targetedMove() {
         int sX = (int) snakesX.peek();
@@ -510,7 +524,7 @@ public class Game {
         }
     }
 
-     void updateStatusPanel() { // skor değerlerinin güncellenip ekrana yazdırılması
+    void updateStatusPanel() { // skor değerlerinin güncellenip ekrana yazdırılması
 
         String timeText = "" + time;
         String energyText = "" + energy;
@@ -604,6 +618,7 @@ public class Game {
             computersMove = false;
         }
     }
+
     private void chooseNewTarget() {
         int tXnew, tYnew;
         boolean isAvaible = false;
