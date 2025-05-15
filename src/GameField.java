@@ -1,4 +1,3 @@
-
 import enigma.console.TextAttributes;
 import java.awt.Color;
 
@@ -6,8 +5,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
-
-import enigma.core.Enigma;
 
 public class GameField {
 
@@ -54,7 +51,7 @@ public class GameField {
                     } else if (ch == 'C' && j < 55) {
                         attrs = new TextAttributes(Color.BLACK, Color.GREEN);
                     } else if(ch == 'S') {
-                    	attrs = new TextAttributes(Color.BLACK, Color.RED);
+                    	attrs = new TextAttributes(Color.WHITE, Color.RED);
                     } else if (ch == '#') {
                         attrs = new TextAttributes(Color.GRAY, Color.GRAY); 
                     } else if (ch == '=') {
@@ -104,4 +101,3 @@ public class GameField {
             }
         }
     }
-}
