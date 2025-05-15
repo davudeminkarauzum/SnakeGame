@@ -13,10 +13,10 @@ public class GameField {
 
     InputQueue inputQueue = new InputQueue();
 
-    public static char[][] map = new char[23][80]; // map arrayini oyun parametrelerini de göstermesi için genişlettim.
+    public static char[][] map = new char[23][80]; //We added parameters in next to the map to y-axis
     public static enigma.console.Console cn;
     
-    private static Game mainGameReference;
+    // private static Game mainGameReference;
 
     public GameField(enigma.console.Console console)
     {
@@ -50,24 +50,24 @@ public class GameField {
 
                 if(j < 55) {
                     if (ch == 'P' && j < 55) {
-                        attrs = new TextAttributes(Color.BLACK, Color.BLUE);
+                        attrs = new TextAttributes(Color.WHITE, Color.BLUE);
                     } else if (ch == 'C' && j < 55) {
                         attrs = new TextAttributes(Color.BLACK, Color.GREEN);
                     } else if(ch == 'S') {
                     	attrs = new TextAttributes(Color.BLACK, Color.RED);
                     } else if (ch == '#') {
-                        attrs = new TextAttributes(Color.WHITE, Color.BLACK); // duvar: mavi arka plan
+                        attrs = new TextAttributes(Color.GRAY, Color.GRAY); 
                     } else if (ch == '=') {
-                        attrs = new TextAttributes(Color.BLACK, Color.GREEN); // duvar: mavi arka plan
+                        attrs = new TextAttributes(Color.BLACK, Color.GREEN); 
                     } else if (ch == 'X') {
-                        attrs = new TextAttributes(Color.BLACK, Color.WHITE); // duvar: mavi arka plan
+                        attrs = new TextAttributes(Color.BLACK, Color.WHITE); 
                     } else if(ch == '.') {
-                    	attrs = new TextAttributes(Color.WHITE, Color.YELLOW);
+                    	attrs = new TextAttributes(Color.BLUE, Color.WHITE);
                     } else {
-                        attrs = new TextAttributes(Color.BLACK, Color.WHITE); // varsayılan
+                        attrs = new TextAttributes(Color.BLACK, Color.WHITE); 
                     }
-                }   else {
-                	attrs = new TextAttributes(Color.WHITE, Color.BLACK); // varsayılan
+                } else {
+                	attrs = new TextAttributes(Color.WHITE, Color.BLACK);
                 }
                 cn.getTextWindow().output(j, i, ch, attrs); 
             }
@@ -78,21 +78,9 @@ public class GameField {
     public boolean isWall(int x, int y) {
         return map[x][y] == '#';
     }
-    
-    public boolean isStuck(int x, int y) {
-        return isWall(x + 1, y) || isWall(x - 1, y) || isWall(x, y + 1) || isWall(x, y - 1) ;
-    }
-    
-    public static boolean isCrashedComputer(int x, int y) {
-        return map[x][y] == 'C';
-    }
-    
-    public static boolean isCrashedS(int x, int y) {
-        return map[x][y] == 'S';
-    }
-    
+
     public boolean isCrashedRobots(int x, int y) {
-    	return isCrashedComputer(x, y) || isCrashedS(x, y);
+    	return map[x][y] == 'C' || map[x][y] == 'S';
     }
      
     public void unloadInputQueue() {
@@ -100,10 +88,9 @@ public class GameField {
         boolean isInserted = false;
         char c = ' ';
         while (!isInserted) {
-             int x = random.nextInt(23);
-             int y = random.nextInt(55); // rastgele koordinat belirlenmesi
+            int x = random.nextInt(23), y = random.nextInt(55); //Selects the coordinates randomly
 
-            if (map[x][y] == ' ') { // koordinat boşsa
+            if (map[x][y] == ' ' || map[x][y] == '.') { //Inserts the treasure this coordinate
                 Object next = inputQueue.dequeueInput();
                 c = next.toString().charAt(0);
 
@@ -111,13 +98,10 @@ public class GameField {
 
                 isInserted = true;
 
-                inputQueue.writeElements(); // Queue'yu tekrar yazdır
-            }
-            if (c == 'S'){
+                inputQueue.writeElements(); //Printing InputQueue after insterting this treasure
+            } if (c == 'S'){
                 Game.addNewSnake(x,y);
             }
         }
-
     }
-
 }
