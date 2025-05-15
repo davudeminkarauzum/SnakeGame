@@ -554,7 +554,7 @@ public class Game {
                     GameField.map[sX + 1][sY] != 'C' &&
                     GameField.map[sX + 1][sY] != 'S'){
                 GameField.map[sX][sY] = ' ';
-                GameField.map[sX + 1][sY] = ' ';
+                GameField.map[sX + 1][sY] = 'S';
                 moved = true;
                 snakesX.dequeue();
                 snakesX.enqueue(sX + 1);
@@ -592,7 +592,7 @@ public class Game {
                     GameField.map[sX][sY + 1] != 'C' &&
                     GameField.map[sX][sY + 1] != 'S') {
                 GameField.map[sX][sY] = ' ';
-                GameField.map[sX][sY + 1] = ' ';
+                GameField.map[sX][sY + 1] = 'S';
                 moved = true;
                 snakesY.dequeue();
                 snakesY.enqueue(sY + 1);
