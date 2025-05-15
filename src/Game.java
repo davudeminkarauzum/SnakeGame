@@ -554,7 +554,7 @@ public class Game {
         boolean moved = false;
 
         if (!moved &&  diffX < 0) { //up
-            if (sX - 1 >= 0 && GameField.map[sX - 1][sY] != '#' &&
+            if (sX - 1 > 0 && GameField.map[sX - 1][sY] != '#' &&
                     GameField.map[sX - 1][sY] != 'P' &&
                     GameField.map[sX - 1][sY] != 'C'){
                 GameField.map[sX][sY] = ' ';
@@ -590,7 +590,7 @@ public class Game {
             }
         }
         if (!moved && diffY < 0){ //left
-            if (sY - 1 < 55 && GameField.map[sX][sY - 1] != '#' &&
+            if (sY - 1 > 0 && GameField.map[sX][sY - 1] != '#' &&
                     GameField.map[sX][sY - 1] != 'P' &&
                     GameField.map[sX][sY - 1] != 'C'){
                 GameField.map[sX][sY] = ' ';
@@ -608,7 +608,7 @@ public class Game {
             }
         }
         if (!moved && diffY > 0){ //right
-            if (sX + 1 >= 0 && GameField.map[sX][sY + 1] != '#' &&
+            if (sY + 1 < 55 && GameField.map[sX][sY + 1] != '#' &&
                     GameField.map[sX][sY + 1] != 'P' &&
                     GameField.map[sX][sY + 1] != 'C') {
                 GameField.map[sX][sY] = ' ';
@@ -617,7 +617,7 @@ public class Game {
                 snakesY.dequeue();
                 snakesY.enqueue(sY + 1);
                 snakesX.enqueue(snakesX.dequeue());
-                
+
                 snakes.enqueue(snakes.dequeue());
                 snakeMoveMove.enqueue(snakeMoveMove.dequeue());
                 snakeTargetX.enqueue(snakeTargetX.dequeue());
@@ -659,11 +659,11 @@ public class Game {
         int attemps = 0;
         int randomCountered;
 
-        while (!moved && attemps < 5){
+        while (!moved){
             int dir = random.nextInt(4);
 
             if (dir == 0) { //means up
-                if (sX - 1 >= 0 &&  GameField.map[sX - 1][sY] != '#' && GameField.map[sX - 1][sY] != 'C' &&
+                if (sX - 1 > 0 &&  GameField.map[sX - 1][sY] != '#' && GameField.map[sX - 1][sY] != 'C' &&
                         GameField.map[sX - 1][sY] != 'P'){
                     GameField.map[sX][sY] = ' ';
                     GameField.map[sX - 1][sY] = 'S';
