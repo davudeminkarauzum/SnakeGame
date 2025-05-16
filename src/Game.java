@@ -1,7 +1,4 @@
 import java.util.Scanner;
-
-import javax.lang.model.util.ElementScanner14;
-
 import java.util.Random;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
