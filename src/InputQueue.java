@@ -26,7 +26,6 @@ public class InputQueue {
     }
 
     Object dequeueInput() { // önce elementi çekiyoruz sonra element ekliyoruz. böyle yaparsak inputQueue'yu 16 boyutluk açmamıza gerek kalmaz
-    	
     	Object a = queue.dequeue();
         addElement();
         return a;      
@@ -43,6 +42,5 @@ public class InputQueue {
             
             queue.enqueue(current);
         }
-
     }
 }
