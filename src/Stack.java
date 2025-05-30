@@ -1,4 +1,3 @@
-
 public class Stack {
 
 	public int top;
@@ -14,7 +13,7 @@ public class Stack {
 			top++;
 			elements[top] = data;
 		} else {
-			System.out.println("The stack is full");
+			System.out.println("The stack is full.");
 		}
 	}
 	
