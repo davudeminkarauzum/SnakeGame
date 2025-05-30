@@ -52,8 +52,4 @@ public class CircularQueue {
             return elements.length -(front-rear-1);
         }
     }
-
-
-
-
 }
