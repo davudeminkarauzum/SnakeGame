@@ -1,4 +1,3 @@
-
 import enigma.console.TextAttributes;
 import java.awt.Color;
 
@@ -7,17 +6,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
 
-import enigma.core.Enigma;
-
 public class GameField {
 
     InputQueue inputQueue = new InputQueue();
 
-    public static char[][] map = new char[23][80]; // map arrayini oyun parametrelerini de göstermesi için genişlettim.
+    public static char[][] map = new char[23][80]; //We added parameters in next to the map to y-axis
     public static enigma.console.Console cn;
+    
+    // private static Game mainGameReference;
 
     public GameField(enigma.console.Console console)
-    {
+    {	
         cn = console;
 
         try {
@@ -46,17 +45,28 @@ public class GameField {
 
                 TextAttributes attrs;
 
-                if (ch == 'P' && j < 55) {
-                    attrs = new TextAttributes(Color.GREEN, Color.BLACK);
-                } else if (ch == 'C' && j < 55) {
-                    attrs = new TextAttributes(Color.RED, Color.BLACK);
-                } else if (ch == '#') {
-                    attrs = new TextAttributes(Color.WHITE, Color.BLUE); // duvar: mavi arka plan
+                if(j < 55) {
+                    if (ch == 'P' && j < 55) {
+                        attrs = new TextAttributes(Color.WHITE, Color.BLUE);
+                    } else if (ch == 'C' && j < 55) {
+                        attrs = new TextAttributes(Color.BLACK, Color.GREEN);
+                    } else if(ch == 'S') {
+                    	attrs = new TextAttributes(Color.WHITE, Color.RED);
+                    } else if (ch == '#') {
+                        attrs = new TextAttributes(Color.GRAY, Color.GRAY); 
+                    } else if (ch == '=') {
+                        attrs = new TextAttributes(Color.BLACK, Color.GREEN); 
+                    } else if (ch == 'X') {
+                        attrs = new TextAttributes(Color.BLACK, Color.WHITE); 
+                    } else if(ch == '.') {
+                    	attrs = new TextAttributes(Color.BLUE, Color.WHITE);
+                    } else {
+                        attrs = new TextAttributes(Color.BLACK, Color.WHITE); 
+                    }
                 } else {
-                    attrs = new TextAttributes(Color.WHITE, Color.BLACK); // varsayılan
+                	attrs = new TextAttributes(Color.WHITE, Color.BLACK);
                 }
-
-                cn.getTextWindow().output(j, i, ch, attrs);
+                cn.getTextWindow().output(j, i, ch, attrs); 
             }
         }
     }
@@ -66,26 +76,29 @@ public class GameField {
         return map[x][y] == '#';
     }
 
+    public boolean isCrashedRobots(int x, int y) {
+    	return map[x][y] == 'C' || map[x][y] == 'S';
+    }
+     
     public void unloadInputQueue() {
         Random random = new Random();
-
         boolean isInserted = false;
-
+        char c = ' ';
         while (!isInserted) {
-            int x = random.nextInt(23);
-            int y = random.nextInt(55); // rastgele koordinat belirlenmesi
+            int x = random.nextInt(23), y = random.nextInt(55); //Selects the coordinates randomly
 
-            if (map[x][y] == ' ') { // koordinat boşsa
+            if (map[x][y] == ' ' || map[x][y] == '.') { //Inserts the treasure this coordinate
                 Object next = inputQueue.dequeueInput();
-                char c = next.toString().charAt(0);
+                c = next.toString().charAt(0);
 
-                map[x][y] = c; // elementleri bir daha aynı yere eklememek için mazeMap'i de güncellemeliyiz
+                map[x][y] = c;
 
                 isInserted = true;
 
-                inputQueue.writeElements(); // Queue'yu tekrar yazdır.
+                inputQueue.writeElements(); //Printing InputQueue after insterting this treasure
+            } if (c == 'S'){
+                Game.addNewSnake(x,y);
             }
         }
     }
-
 }
