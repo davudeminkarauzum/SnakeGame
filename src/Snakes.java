@@ -1,53 +1,118 @@
+import java.util.Random;
+
 public class Snakes {
 
-    private SingleLinkedList[] elements;
-    private int rear, front;
+    private int xcoor, ycoor;
+    private int targetx, targety;
+    private boolean movemode;
+    private int stuckCounter;
+    Node head;
 
-    public Snakes(int capacity){
-        elements = new SingleLinkedList[capacity]; 
-        rear = -1;
-        front = 0;
+    public Snakes(int x, int y){
+        head = null;
+        movemode = true;
+        stuckCounter = 0;
+        xcoor = x;
+        ycoor = y;
+        Random rnd = new Random();
+        int tx, ty;
+        boolean isAvaible = false;
+        do {
+            tx = rnd.nextInt(23);
+            ty = rnd.nextInt(55);
+            if (GameField.map[tx][ty] == '1' || GameField.map[tx][ty] == '2' || GameField.map[tx][ty] == '3'){
+                isAvaible = true;
+            }
+        }while (!isAvaible);
+        targetx = tx;
+        targety = ty;
     }
 
-    boolean isEmpty(){
-        return elements[front] == null;
+    public int getXcoor(){
+        return xcoor;
     }
 
-    boolean isFull(){
-        return (front == (rear + 1) % elements.length && elements[rear] != null);
+    public void setXcoor(int xcoor) {
+        this.xcoor = xcoor;
     }
 
-    void enqueue(SingleLinkedList data){
-
-            rear = (rear + 1) % elements.length;
-            elements[rear] = data;
-
+    public int getYcoor(){
+        return ycoor;
     }
 
-    SingleLinkedList dequeue(){
-        if(isEmpty()){
-            System.out.println("Queue is Empty");
-            return null;
+    public int getTargetx(){
+        return targetx;
+    }
+
+    public void setTargetx(int targetx) {
+        this.targetx = targetx;
+    }
+
+    public void setYcoor(int ycoor) {
+        this.ycoor = ycoor;
+    }
+
+    public int getTargety() {
+        return targety;
+    }
+
+    public void setTargety(int targety) {
+        this.targety = targety;
+    }
+
+    public boolean getMovemode() {
+        return movemode;
+    }
+
+    public void setMovemode(boolean movemode) {
+        this.movemode = movemode;
+    }
+
+    public int getStuckCounter() {
+        return stuckCounter;
+    }
+
+    public void setStuckCounter(int stuckCounter) {
+        this.stuckCounter = stuckCounter;
+    }
+
+    public void add(Object data) {
+        if(head == null) {
+            head = new Node(data);
         } else {
-            SingleLinkedList retdata = elements[front];
-            elements[front] = null;
-            front = (front + 1) % elements.length;
-            return retdata;
+            Node temp = head;
+            while(temp.getLink() != null) {
+                temp = (Node) temp.getLink();
+            }
+            Node toAdd = new Node(data);
+            temp.setLink(toAdd);
         }
     }
 
-    SingleLinkedList peek(){
-        return elements[front];
+    public void display() {
+        if(head == null) {
+            System.out.println("The list is empty.");
+        } else {
+            Node temp = head;
+            while(temp != null) {
+                System.out.print(temp.getData() + " ");
+                temp =  temp.getLink();
+            }
+        }
     }
 
-    int size(){
-        if (elements[front] == null) {
+    public int size() {
+        if(head == null) {
             return 0;
         } else {
-            if (rear >= front)
-                return rear - front + 1;
-            else
-                return elements.length - (front - rear) + 1;
+            int count = 0;
+            Node temp = head;
+            while(temp != null) {
+                temp = temp.getLink();
+                count++;
+            }
+            return count;
         }
     }
+    
 }
