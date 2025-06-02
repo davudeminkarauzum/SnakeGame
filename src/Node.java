@@ -1,4 +1,3 @@
-package snakegame;
 
 public class Node {
 		
