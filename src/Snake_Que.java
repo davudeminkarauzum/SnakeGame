@@ -1,10 +1,10 @@
 public class Snake_Que {
 
-    private Snakes[] elements;
+    private Snake[] elements;
     private int rear, front;
 
     public Snake_Que(int capacity) {
-        elements = new Snakes[capacity];
+        elements = new Snake[capacity];
         rear = -1;
         front = 0;
     }
@@ -24,7 +24,7 @@ public class Snake_Que {
             return false;
     }
 
-    public void enqueue(Snakes data) {
+    public void enqueue(Snake data) {
         if (isFull()) {
             System.out.println("Queue is Full");
         } else {
@@ -33,19 +33,19 @@ public class Snake_Que {
         }
     }
 
-    public Snakes dequeue() {
+    public Snake dequeue() {
         if (isEmpty()) {
             System.out.println("Queue is Empty");
             return null;
         } else {
-            Snakes retdata = elements[front];
+            Snake retdata = elements[front];
             elements[front] = null;
             front = (front + 1) % elements.length;
             return retdata;
         }
     }
 
-    public Snakes peek() {
+    public Snake peek() {
         if (isEmpty()) {
             return null;
         }
