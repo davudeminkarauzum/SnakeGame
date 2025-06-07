@@ -1,4 +1,5 @@
-import java.util.Scanner;
+
+        import java.util.Scanner;
 import java.util.Random;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -12,7 +13,7 @@ import enigma.core.Enigma;
 
 public class Game {
     String choice;
-    enigma.console.Console cn = Enigma.getConsole("Snake Game", 180, 44);
+    enigma.console.Console cn = Enigma.getConsole("Snake Game", 100, 20, 20);
 
     private Scanner scanner;
     static Random random = new Random();
@@ -31,24 +32,16 @@ public class Game {
 
     // Variables for player and C robot
     boolean playersMove = false, computersMove = false;
-    int px = 0, py = 0, playerscore = 0, cx = 0, cy = 0, targetedCX = 0, targetedCY = 0, computerscore = 0;
+    int px = 0, py = 0, playerscore = 0, cx = 0, cy = 0, computerscore = 0;
     Stack pathfinding = new Stack(500);
+    boolean intersectsPath = false;
 
     // Snakes constructors
     public static int snakeCounter = 0;
-    public Snake_Que snakes = new Snake_Que(15);
 
-/*
-    public static CircularQueue snakesX = new CircularQueue(15);
-    public static CircularQueue snakeTargetX = new CircularQueue(15);
-    public static CircularQueue snakesY = new CircularQueue(15);
-    public static CircularQueue snakeTargetY = new CircularQueue(15);
-    public static CircularQueue snakeMoveMove = new CircularQueue(15);
-    public static CircularQueue randomMoveCounter = new CircularQueue(15);
-
-
- */
     Trap[] traps = new Trap[100];
+   // public static Snakes [] snakes = new Snake[100];
+    public static Snake_Que snakes = new Snake_Que(100);
 
     public Game() throws Exception {
 
@@ -70,7 +63,6 @@ public class Game {
 
         int gametiming = 0;
         int trapcounter = 0;
-
         do {
             cn.getTextWindow().setCursorPosition(25, 0);
             cn.getTextWindow().output("Welcome to the snake game");
@@ -87,14 +79,18 @@ public class Game {
             }
         } while (!choice.equals("1") && !choice.equals("2"));
 
-        while(true) {
-            if (choice.equals("2")) {
-                cn.getTextWindow().setCursorPosition(25, 4);
-                cn.getTextWindow().output("Exiting...");
-                System.exit(0);
-            } else if (choice.equals("1")) {
-                clearScreen();
-                GameField gameField = new GameField(cn);
+        if (choice.equals("2")) {
+            // Konsolu kapat ve uygulamayı sonlandır
+            cn.getTextWindow().setCursorPosition(25, 4);
+            cn.getTextWindow().output("Exiting...");
+            System.exit(0);
+        }
+        if (choice.equals("1")) {
+            clearScreen();
+            GameField gameField = new GameField(cn);
+
+
+            while (true) {
                 cn.getTextWindow().addKeyListener(klis);
 
                 while (!(GameField.map[px][py] == ' ' && GameField.map[cx][cy] == ' ')) {
@@ -110,8 +106,10 @@ public class Game {
                 GameField.map[px][py] = 'P';
                 GameField.map[cx][cy] = 'C';
 
+
                 for (int i = 0; i < 30; i++) // oyunun başında tahtaya input queue'dan 30 element boşalt
                     gameField.unloadInputQueue();
+
 
                 while (life >= 0) { // main loop of the game
 
@@ -216,9 +214,22 @@ public class Game {
                     }
 
                     if (gametiming % 4 == 0) { // Both robots movement (0.4 second)
-
                         // S robot movements
-                        moveSnakes();
+
+                        for (int k = 0; k < snakeCounter; k++) {
+                            Snake s = snakes.peek();
+                            if (s.isAlive()) {
+                                s.snakeMovement();
+                            }
+                            snakes.enqueue(snakes.dequeue());
+
+                            /*
+                            if (snakes[k].isAlive()) {
+
+                                snakes[k].snakeMovement();
+                            }
+                             */
+                        }
 
                         // C robot movements
                         computersMove = true;
@@ -238,32 +249,18 @@ public class Game {
                                 move(cx - 1, cy);
                             }
 
-                        }
-
-                        if (!computersMove && (GameField.map[targetedCX][targetedCY] == '1' ||
-                                GameField.map[targetedCX][targetedCY] == '2' ||
-                                GameField.map[targetedCX][targetedCY] == '3' ||
-                                GameField.map[targetedCX][targetedCY] == '@')) {
-                            pathfinding.pop();
-                        } else {
-                            while (!(GameField.map[targetedCX][targetedCY] == '1' ||
-                                    GameField.map[targetedCX][targetedCY] == '2' ||
-                                    GameField.map[targetedCX][targetedCY] == '3' ||
-                                    GameField.map[targetedCX][targetedCY] == '@')) {
-                                targetedCX = random.nextInt(22) + 1;
-                                targetedCY = random.nextInt(54) + 1;
+                            if (!computersMove) {
+                                pathfinding.pop();
                             }
+                        } else {
                             char[][] tempMap = new char[23][55];
 
                             for (int i = 0; i < 23; i++) {
                                 for (int j = 0; j < 55; j++) {
-                                    if(GameField.map[i][j] == '.') {
-                                        GameField.map[i][j] = ' ';
-                                    }
                                     tempMap[i][j] = GameField.map[i][j];
                                 }
                             }
-                            pathfinding = pathfinding(tempMap, cx, cy, targetedCX, targetedCY);
+                            pathfinding = pathfinding(tempMap, cx, cy);
                         }
 
                         computersMove = false;
@@ -282,16 +279,31 @@ public class Game {
                             || GameField.map[px][py + 1] == 'S' || GameField.map[px][py - 1] == 'S')
                         life -= 1;
 
-                    for (int k = 0; k < trapcounter; k++) {
-                        if (traps[k].getTime() != -1) {
-                            if (gametiming - traps[k].getTime() >= 100)
-                                traps[k].disappear();
+                    for (int t = 0; t < trapcounter; t++) {
+                        if (traps[t].getTime() != -1) {
+                            if (gametiming - traps[t].getTime() >= 100)
+                                traps[t].boom();
 
                             else {
-                                if (traps[k].checkSnake()) {
-                                    traps[k].boom();
-                                    playerscore += 200;
-                                    energy += 500;
+                                for (int i = 0; i < snakeCounter; i++) {
+                                    Snake s = snakes.peek();
+                                    if (traps[t].checkSnake() && s.checkTrap() && s.isAlive()) {
+                                        traps[t].boom();
+                                        s.die();
+                                        playerscore += 200;
+                                        energy += 500;
+                                    }
+                                    snakes.enqueue(snakes.dequeue());
+
+                                    /*
+                                    if (traps[t].checkSnake() && snakes[s].checkTrap() && snakes[s].isAlive()) {
+                                        traps[t].boom();
+                                        snakes[s].die();
+                                        playerscore += 200;
+                                        energy += 500;
+                                    }
+
+                                     */
                                 }
                             }
                         }
@@ -316,7 +328,7 @@ public class Game {
                 try {
                     BufferedReader reader = new BufferedReader(new FileReader("highscore.txt"));
                     String s = reader.readLine();
-                    while(s != null) {
+                    while (s != null) {
                         highScoreList.addOrderedScores(s);
                         s = reader.readLine();
                     }
@@ -325,8 +337,8 @@ public class Game {
                     System.out.println();
                     System.out.println("High Score List");
                     System.out.println("-------------------------");
-                    for(int i = 0; i < highScoreList.size(); i++) {
-                        if(i == 0) {
+                    for (int i = 0; i < highScoreList.size(); i++) {
+                        if (i == 0) {
                             writer.write((String) highScoreList.returnData(i));
                         } else {
                             writer.write("\n" + (String) highScoreList.returnData(i));
@@ -348,29 +360,30 @@ public class Game {
                     }
                 } while (!choice.equals("Y") && !choice.equals("N"));
 
-                if(choice.equals("Y")) {
+                if (choice.equals("Y")) {
                     //Resetting variables for next round
-                    time = 0; energy = 500; life = 1000; trap = 0;
+                    time = 0;
+                    energy = 500;
+                    life = 1000;
+                    trap = 0;
 
-                    playersMove = false; computersMove = false;
-                    px = 0; py = 0; playerscore = 0; cx = 0; cy = 0; targetedCX = 0; targetedCY = 0; computerscore = 0;
+                    playersMove = false;
+                    computersMove = false;
+                    px = 0;
+                    py = 0;
+                    playerscore = 0;
+                    cx = 0;
+                    cy = 0;
+                    computerscore = 0;
                     pathfinding = new Stack(500);
-                    /*
-                    snakeCounter = 0;
-                    snakes = new Snakes(15);
-                    snakesX = new CircularQueue(15); snakeTargetX = new CircularQueue(15);
-                    snakesY = new CircularQueue(15); snakeTargetY = new CircularQueue(15);
-                    snakeMoveMove = new CircularQueue(15);
-                    randomMoveCounter = new CircularQueue(15);
-                    choice = "1";
 
-                     */
-                } else if(choice.equals("N")) {
+                } else if (choice.equals("N")) {
                     System.out.println("Exiting...");
                     System.exit(0);
                 }
             }
         }
+
     }
 
     public void clearScreen() { // ekranın temizlenmesi
@@ -388,16 +401,25 @@ public class Game {
         GameField.printScreen();
     }
 
-    public static Stack pathfinding(char[][] map, int cx, int cy, int targetedX, int targetedY) {
+    public static Stack pathfinding(char[][] map, int cx, int cy) {
+        int targetedX = 0, targetedY = 0;
+
+        while (!(map[targetedX][targetedY] == '1' ||
+                map[targetedX][targetedY] == '2' ||
+                map[targetedX][targetedY] == '3' ||
+                map[targetedX][targetedY] == '@')) {
+            targetedX = random.nextInt(22) + 1;
+            targetedY = random.nextInt(54) + 1;
+        }
 
         boolean[][] visited = new boolean[23][55];
         int[][][] neighbor = new int[23][55][2];
 
         Stack stack = new Stack(1000);
-        stack.push(new int[] { cx, cy });
+        stack.push(new int[]{cx, cy});
         visited[cx][cy] = true;
 
-        int[][] directions = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } }; // Right, Down, Left, Up
+        int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}; // Right, Down, Left, Up
 
         Stack[] bfsGraph = new Stack[23 * 55];
         int depth = 0, x = 0, y = 0;
@@ -413,7 +435,7 @@ public class Game {
                     int nx = x + directions[i][0], ny = y + directions[i][1];
 
                     if (!visited[nx][ny] && map[nx][ny] != '#' && map[nx][ny] != 'P' && map[nx][ny] != 'S') {
-                        currentLevelStack.push(new int[] { nx, ny });
+                        currentLevelStack.push(new int[]{nx, ny});
                         visited[nx][ny] = true;
                         neighbor[nx][ny][0] = x;
                         neighbor[nx][ny][1] = y;
@@ -448,8 +470,6 @@ public class Game {
 
         return result;
     }
-
-
 
     void updateStatusPanel() { // skor değerlerinin güncellenip ekrana yazdırılması
 
@@ -516,16 +536,26 @@ public class Game {
     void move(int newX, int newY) {
         if (playersMove) {
             // In case of crossing C robot's path
-            GameField.map[px][py] = ' ';
+            if (intersectsPath) {
+                GameField.map[px][py] = '.';
+            } else {
+                GameField.map[px][py] = ' ';
+                intersectsPath = false;
+            }
+
+            if (GameField.map[newX][newY] == '.') {
+                intersectsPath = true;
+            } else {
+                intersectsPath = false;
+            }
+
             px = newX;
             py = newY;
             GameField.map[px][py] = 'P';
             if (energy > 0) { // Spending energy
                 energy--;
             }
-        }
-
-        else if (computersMove && GameField.map[newX][newY] != 'P' && GameField.map[newX][newY] != 'S') {
+        } else if (computersMove && GameField.map[newX][newY] != 'P' && GameField.map[newX][newY] != 'S') {
             GameField.map[cx][cy] = ' ';
             cx = newX;
             cy = newY;
@@ -534,160 +564,5 @@ public class Game {
         }
     }
 
-    // this function adds a new snake and hold coordinates at different queues
-    public void addNewSnake(int i, int j) {
-        Snakes a = new Snakes(i,j);
-        snakes.enqueue(a);
-        snakeCounter++;
-    }
 
-    public void moveSnakes() {
-        Snakes s;
-        for (int i = 0; i < snakeCounter; i++) {
-            s = snakes.peek();
-            //if it arrived the target, choose new target
-            if (s.getXcoor() == s.getTargetx() && s.getYcoor() == s.getTargety()) {
-                chooseNewTarget();
-            }
-            if (s.getMovemode()) {
-                targetedMove();
-            } else {
-                randomMove();
-            }
-            snakes.enqueue(snakes.dequeue());
-        }
-    }
-
-    private void chooseNewTarget() {
-        int tXnew, tYnew;
-        boolean isAvaible = false;
-        Snakes s = snakes.peek();
-        do {
-            tXnew = random.nextInt(23);
-            tYnew = random.nextInt(55);
-            if (GameField.map[tXnew][tYnew] == '1' || GameField.map[tXnew][tYnew] == '2' ||
-                    GameField.map[tXnew][tYnew] == '3') {
-                isAvaible = true;
-            }
-        }while (!isAvaible);
-        s.setTargetx(tXnew);
-        s.setTargety(tYnew);
-        s.setStuckCounter(0);
-        s.setMovemode(true);
-    }
-
-    public void targetedMove() {
-        Snakes s = snakes.peek();
-
-        int sX = s.getXcoor();
-        int sY = s.getYcoor();
-        int tX = s.getTargetx();
-        int tY = s.getTargety();
-        int diffX = tX - sX;
-        int diffY = tY - sY;
-        boolean moved = false;
-
-        if (!moved &&  diffX < 0) { //up
-            if (sX - 1 > 0 && GameField.map[sX - 1][sY] != '#' &&
-                    GameField.map[sX - 1][sY] != 'P' &&
-                    GameField.map[sX - 1][sY] != 'C'){
-                GameField.map[sX][sY] = ' ';
-                GameField.map[sX - 1][sY] = 'S';
-                moved = true;
-                s.setXcoor(sX - 1);
-            }
-        }
-        if (!moved && diffX > 0) { //down
-            if(sX + 1 < 23 && GameField.map[sX + 1][sY] != '#' &&
-                    GameField.map[sX + 1][sY] != 'P' &&
-                    GameField.map[sX + 1][sY] != 'C'){
-                GameField.map[sX][sY] = ' ';
-                GameField.map[sX + 1][sY] = 'S';
-                moved = true;
-                s.setXcoor(sX + 1);
-            }
-        }
-        if (!moved && diffY < 0){ //left
-            if (sY - 1 > 0 && GameField.map[sX][sY - 1] != '#' &&
-                    GameField.map[sX][sY - 1] != 'P' &&
-                    GameField.map[sX][sY - 1] != 'C'){
-                GameField.map[sX][sY] = ' ';
-                GameField.map[sX][sY - 1] = 'S';
-                moved = true;
-                s.setYcoor(sY - 1);
-            }
-        }
-        if (!moved && diffY > 0){ //right
-            if (sY + 1 < 55 && GameField.map[sX][sY + 1] != '#' &&
-                    GameField.map[sX][sY + 1] != 'P' &&
-                    GameField.map[sX][sY + 1] != 'C') {
-                GameField.map[sX][sY] = ' ';
-                GameField.map[sX][sY + 1] = 'S';
-                moved = true;
-                s.setYcoor(sY + 1);
-            }
-        }
-
-        //we check for if it moved or not
-        if (!moved){
-            s.setMovemode(false);
-            randomMove();
-        }
-
-    }
-
-    private void randomMove() {
-        Snakes s = snakes.peek();
-        int sX, sY;
-        sX = s.getXcoor();
-        sY = s.getYcoor();
-        boolean moved = false;
-
-        while (!moved){
-            int dir = random.nextInt(4);
-
-            if (dir == 0) { //means up
-                if (sX - 1 > 0 &&  GameField.map[sX - 1][sY] != '#' && GameField.map[sX - 1][sY] != 'C' &&
-                        GameField.map[sX - 1][sY] != 'P'){
-                    GameField.map[sX][sY] = ' ';
-                    GameField.map[sX - 1][sY] = 'S';
-                    moved = true;
-                    s.setXcoor(sX - 1);
-                }
-            }
-            else if (dir == 1) { //means down
-                if (sX + 1 < 23 &&  GameField.map[sX + 1][sY] != '#' && GameField.map[sX + 1][sY] != 'C' &&
-                        GameField.map[sX + 1][sY] != 'P') {
-                    GameField.map[sX][sY] = ' ';
-                    GameField.map[sX + 1][sY] = 'S';
-                    moved = true;
-                    s.setXcoor(sX + 1);
-                }
-            }
-            else if (dir == 2) { //means left
-                if (sY - 1 > 0 && GameField.map[sX][sY - 1] != '#' && GameField.map[sX][sY - 1] != 'C' &&
-                        GameField.map[sX][sY - 1] != 'P'){
-                    GameField.map[sX][sY] = ' ';
-                    GameField.map[sX][sY - 1] = 'S';
-                    moved = true;
-                    s.setYcoor(sY - 1);
-                }
-            }
-            else if (dir == 3){ //means right
-                if (sY + 1 < 55 && GameField.map[sX][sY + 1] != '#' && GameField.map[sX][sY + 1] != 'C' &&
-                        GameField.map[sX][sY + 1] != 'P'){
-                    GameField.map[sX][sY] = ' ';
-                    GameField.map[sX][sY + 1] = 'S';
-                    moved = true;
-                    s.setYcoor(sY + 1);
-                }
-            }
-        }
-        s.setStuckCounter(s.getStuckCounter() + 1);
-
-        if (s.getStuckCounter() > 25){
-            s.setStuckCounter(0);
-            s.setMovemode(true);
-        }
-    }
 }
