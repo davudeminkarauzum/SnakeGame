@@ -224,16 +224,16 @@ public class Game {
                         computersMove = true;
                         if (!pathfinding.isEmpty()) {
                             String way = (String) pathfinding.peek();
-                            if (way.equals("R")) {
+                            if (way.equals("R") && !(Snake.isCrashedSnake(cx, cy + 1) || GameField.map[cx][cy + 1] == 'P')) {
                                 collectTreasures(cx, cy + 1);
                                 move(cx, cy + 1);
-                            } else if (way.equals("D")) {
+                            } else if (way.equals("D") && !(Snake.isCrashedSnake(cx + 1, cy) || GameField.map[cx + 1][cy] == 'P')) {
                                 collectTreasures(cx + 1, cy);
                                 move(cx + 1, cy);
-                            } else if (way.equals("L")) {
+                            } else if (way.equals("L") && !(Snake.isCrashedSnake(cx, cy - 1) || GameField.map[cx][cy - 1] == 'P')) {
                                 collectTreasures(cx, cy - 1);
                                 move(cx, cy - 1);
-                            } else if (way.equals("U")) {
+                            } else if (way.equals("U") && !(Snake.isCrashedSnake(cx - 1, cy) || GameField.map[cx - 1][cy] == 'P')) {
                                 collectTreasures(cx - 1, cy);
                                 move(cx - 1, cy);
                             }
@@ -275,9 +275,8 @@ public class Game {
                     if (GameField.map[px + 1][py] == 'C' || GameField.map[px - 1][py] == 'C'
                             || GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C')
                         life -= 30;
-                    else if (GameField.map[px + 1][py] == 'S' || GameField.map[px - 1][py] == 'S'
-                            || GameField.map[px][py + 1] == 'S' || GameField.map[px][py - 1] == 'S')
-                        life -= 1;
+                    else if (Snake.snakeNeighborCount(px, py) > 0)
+                        life += -1*Snake.snakeNeighborCount(px, py);
 
                     for (int t = 0; t < trapcounter; t++) {
                         if (traps[t].getTime() != -1) {
@@ -414,7 +413,7 @@ public class Game {
                 for (int i = 0; i < 4; i++) {
                     int nx = x + directions[i][0], ny = y + directions[i][1];
 
-                    if (!visited[nx][ny] && map[nx][ny] != '#' && map[nx][ny] != 'P' && map[nx][ny] != 'S') {
+                    if (!visited[nx][ny] && map[nx][ny] != '#' && map[nx][ny] != 'P' && !Snake.isCrashedSnake(nx, ny)) {
                         currentLevelStack.push(new int[]{nx, ny});
                         visited[nx][ny] = true;
                         neighbor[nx][ny][0] = x;
@@ -522,7 +521,7 @@ public class Game {
             if (energy > 0) { // Spending energy
                 energy--;
             }
-        } else if (computersMove && GameField.map[newX][newY] != 'P' && GameField.map[newX][newY] != 'S') {
+        } else if (computersMove) {
             GameField.map[cx][cy] = ' ';
             cx = newX;
             cy = newY;
@@ -530,6 +529,4 @@ public class Game {
             computersMove = false;
         }
     }
-
-
 }
