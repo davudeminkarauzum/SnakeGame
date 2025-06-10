@@ -12,7 +12,7 @@ import enigma.core.Enigma;
 
 public class Game {
     String choice;
-    enigma.console.Console cn = Enigma.getConsole("Snake Game", 100, 20, 20);
+    static enigma.console.Console cn = Enigma.getConsole("Snake Game", 100, 20, 20);
 
     private Scanner scanner;
     static Random random = new Random();
@@ -24,20 +24,15 @@ public class Game {
     public int tempkey;
 
     // Creating necessary variables
-    int time = 0;
-    int energy = 500;
-    int life = 1000;
-    int trap = 0;
+    int time, energy, life, trap, gametiming, trapcounter;
 
     // Variables for player and C robot
-    boolean playersMove = false, computersMove = false;
-    int px = 0, py = 0, playerscore = 0, cx = 0, cy = 0, targetedCX = 0, targetedCY = 0, computerscore = 0;
+    boolean playersMove, computersMove;
+    int px, py , playerscore, cx, cy, targetedCX, targetedCY, computerscore;
     Stack pathfinding = new Stack(500);
 
-    // Snakes constructors
-
-    Trap[] traps = new Trap[100];
-    public static Snake_Que snakes = new Snake_Que(100);
+    Trap[] traps;
+    public static Snake_Que snakes;;
 
     public Game() throws Exception {
 
@@ -57,37 +52,44 @@ public class Game {
             }
         };
 
-        int gametiming = 0;
-        int trapcounter = 0;
-        do {
-            cn.getTextWindow().setCursorPosition(25, 0);
-            cn.getTextWindow().output("Welcome to the snake game");
-            cn.getTextWindow().setCursorPosition(25, 1);
-            cn.getTextWindow().output("To start the game press number 1");
-            cn.getTextWindow().setCursorPosition(25, 2);
-            cn.getTextWindow().output("To exit the game press number 2\n");
-
-            cn.getTextWindow().setCursorPosition(25, 3);
-            choice = scanner.nextLine();
-            if (!choice.equals("1") && !choice.equals("2")) {
-                cn.getTextWindow().setCursorPosition(25, 4);
-                cn.getTextWindow().output("Please enter 1 or 2!\n");
-            }
-        } while (!choice.equals("1") && !choice.equals("2"));
-
-        if (choice.equals("2")) {
-            // Konsolu kapat ve uygulamayı sonlandır
-            cn.getTextWindow().setCursorPosition(25, 4);
-            cn.getTextWindow().output("Exiting...");
-            System.exit(0);
-        }
-        if (choice.equals("1")) {
-            clearScreen();
-            GameField gameField = new GameField(cn);
-
-
             while (true) {
-                cn.getTextWindow().addKeyListener(klis);
+                do {
+                    cn.getTextWindow().setCursorPosition(25, 0);
+                    cn.getTextWindow().output("Welcome to the snake game");
+                    cn.getTextWindow().setCursorPosition(25, 1);
+                    cn.getTextWindow().output("To start the game press number 1");
+                    cn.getTextWindow().setCursorPosition(25, 2);
+                    cn.getTextWindow().output("To exit the game press number 2\n");
+
+                    cn.getTextWindow().setCursorPosition(25, 3);
+                    choice = scanner.nextLine();
+                    if (!choice.equals("1") && !choice.equals("2")) {
+                        cn.getTextWindow().setCursorPosition(25, 4);
+                        cn.getTextWindow().output("Please enter 1 or 2!\n");
+                    }
+                } while (!choice.equals("1") && !choice.equals("2"));
+
+                if (choice.equals("2")) {
+                    cn.getTextWindow().setCursorPosition(25, 4);
+                    cn.getTextWindow().output("Exiting...");
+                    System.exit(0);
+                } else if (choice.equals("1")) {
+                    clearScreen();
+                    GameField gameField = new GameField(cn);
+                    gametiming = 0;
+                    trapcounter = 0;
+                    time = 0;
+                    energy = 500;
+                    life = 1000;
+                    trap = 0;
+
+                    playersMove = false; computersMove = false;
+                    px = 0; py = 0; playerscore = 0; cx = 0; cy = 0; targetedCX = 0; targetedCY = 0; computerscore = 0;
+                    pathfinding = new Stack(500);
+
+                    traps = new Trap[100];
+                    snakes = new Snake_Que(100);
+                    cn.getTextWindow().addKeyListener(klis);
 
                 while (!(GameField.map[px][py] == ' ' && GameField.map[cx][cy] == ' ')) {
                     if (GameField.map[px][py] != ' ') {
@@ -305,7 +307,6 @@ public class Game {
                     }
 
                     gametiming++; // 0.1 saniyede bir artar
-
                 }
 
                 clearScreen();
@@ -323,59 +324,47 @@ public class Game {
                     }
                     reader.close();
                     BufferedWriter writer = new BufferedWriter(new FileWriter("highscore.txt"));
-                    System.out.println();
+                    clearScreen();
+                    cn.getTextWindow().setCursorPosition(25, 0);
                     System.out.println("High Score List");
+                    cn.getTextWindow().setCursorPosition(25, 1);
                     System.out.println("-------------------------");
-                    for (int i = 0; i < highScoreList.size(); i++) {
+                    for (int i = 0; i < highScoreList.size(); i++) { //Writing the list in file and screen
+                    	cn.getTextWindow().setCursorPosition(25, 2 + i);
                         if (i == 0) {
                             writer.write((String) highScoreList.returnData(i));
                         } else {
                             writer.write("\n" + (String) highScoreList.returnData(i));
                         }
+                        System.out.println((String) highScoreList.returnData(i));
                     }
                     writer.close();
-                    highScoreList.display();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-                System.out.println();
-                System.out.println("Play again? ");
-                choice = "";
-                do {
-                    choice = scanner.nextLine();
-                    if (!choice.equals("1") && !choice.equals("2")) {
-                        System.out.println("Please enter only Y or N");
+                
+                time = 10;
+                while(time > 0) {
+                	cn.getTextWindow().setCursorPosition(25, 5 + highScoreList.size());
+                	System.out.println("You will return the menu " + time + " second later..");
+                    if (gametiming % 10 == 0) {
+                        time--;
                     }
-                } while (!choice.equals("Y") && !choice.equals("N"));
-
-                if (choice.equals("Y")) {
-                    //Resetting variables for next round
-                    time = 0;
-                    energy = 500;
-                    life = 1000;
-                    trap = 0;
-
-                    playersMove = false;
-                    computersMove = false;
-                    px = 0;
-                    py = 0;
-                    playerscore = 0;
-                    cx = 0;
-                    cy = 0;
-                    computerscore = 0;
-                    pathfinding = new Stack(500);
-
-                } else if (choice.equals("N")) {
-                    System.out.println("Exiting...");
-                    System.exit(0);
+                    
+                    try {
+                        Thread.sleep(100); // 1 time unit
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    gametiming++;
                 }
+                clearScreen();
             }
         }
 
     }
 
-    public void clearScreen() { // ekranın temizlenmesi
+    public void clearScreen() {
         for (int i = 0; i < 80; i++) {
             for (int z = 0; z < 30; z++) {
                 cn.getTextWindow().output(i, z, ' ');
