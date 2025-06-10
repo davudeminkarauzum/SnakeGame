@@ -56,7 +56,7 @@ public class Snake {
 	  else if(y > targetedY && !isTail(x, y - 1)) {
 		 
 		  if(GameField.map[x][y - 1] != '#')
-			  move(x, y - 1);	
+			  move(x, y - 1, x, y);	
 
 		  else 
 		    randomMoveCounter = 25;		
@@ -65,7 +65,7 @@ public class Snake {
       else if(y < targetedY && !isTail(x, y + 1)) {
     	
     	  if(GameField.map[x][y + 1] != '#')
-			  move(x, y + 1);	
+			  move(x, y + 1, x, y);	
 
 		  else 
 		    randomMoveCounter = 25;			
@@ -73,7 +73,7 @@ public class Snake {
 	
 	  else if(x > targetedX && !isTail(x - 1, y)) {
 		  if(GameField.map[x - 1][y] != '#')
-		 	  move(x - 1, y);	
+		 	  move(x - 1, y, x, y);	
 
 		  else 
 		    randomMoveCounter = 25;					
@@ -81,14 +81,14 @@ public class Snake {
 	
 	  else if(x < targetedX && !isTail(x + 1, y)) {
 		  if(GameField.map[x + 1][y] != '#')
-			  move(x + 1, y);	
+			  move(x + 1, y, x, y);	
 
 		  else 
 		    randomMoveCounter = 25;		
 	  }
   }
 
-  public void move(int newSx, int newSy) {
+  public void move(int newSx, int newSy, int x, int y) {
 	
 	deleteSnakeOnMap();
 	
@@ -125,8 +125,17 @@ public class Snake {
 					snake.bodyParts.deleteFirst();
 					snake.bodyParts.collisionType1(snake.bodyParts, count);
 				}
-				snake.bodyParts.clear();
-				Game.snakes.dequeue();
+				for(int i = 0; i < Game.snakes.size(); i++) {
+					SnakeElement element = (SnakeElement) Game.snakes.peek().bodyParts.getHead().getData();
+					sX = element.getX();   sY = element.getY();
+					
+					if(sX == x && sY == y) {
+						snake.bodyParts.clear();
+						Game.snakes.dequeue();
+						break;
+					}
+					Game.snakes.enqueue(Game.snakes.dequeue());
+				}
 			} else {
 				snake.bodyParts.collisionType2andType3(count);
 				snake.reverseSnake();
@@ -195,7 +204,7 @@ public void randomMove() {
           }
       } while (GameField.map[x + randomX] [y + randomY] == '#' || isTail(x + randomX, y + randomY));
 	
-	  move(x + randomX, y + randomY);
+	  move(x + randomX, y + randomY, x, y);
 	  randomMoveCounter--;
 }
 
