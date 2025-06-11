@@ -224,34 +224,23 @@ public void eat(int newSx, int newSy) {
 	snakeHead.setY(newSy);
 }
 
+
 public boolean stuck() {
 	
 	SnakeElement head = (SnakeElement) bodyParts.getHead().getData();
 	int x = head.getX();
 	int y = head.getY();
 	
-	int deadStuckCount = 0;
+	int stuckCount = 0;
 	
 	for (int i = -1; i <= 1; i += 2) {
-	    if (GameField.map[x + i][y] != ' ') 
-	    	deadStuckCount++;
-	    if (GameField.map[x][y + i] != ' ') 
-	    	deadStuckCount++;
+	    if (GameField.map[x + i][y] == '#' || isTail(x + i, y) ) 
+	    	stuckCount++;
+	    if (GameField.map[x][y + i] == '#' || isTail(x, y + i) ) 
+	    	stuckCount++;
 	}
 	
-	if(deadStuckCount == 4)
-		return true;
-	
-    int wallCount = 0;
-	
-	for (int i = -1; i <= 1; i += 2) {
-	    if (GameField.map[x + i][y] == '#') 
-	    	wallCount++;
-	    if (GameField.map[x][y + i] == '#') 
-	    	wallCount++;
-	}
-	
-	if(wallCount == 3)
+	if(stuckCount == 4)
 		return true;
 	
 	return false;
