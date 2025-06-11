@@ -42,10 +42,10 @@ public class SingleLinkedList {
 		   temp2 = (Node) temp2.getLink();
 	   }
 	
-	   temp.setLink(snake.getHead());
 	   if(afterTemp != null) {
 		   temp2.setLink(afterTemp);
 	   }
+	   snake.getHead().setLink(temp);
    }
    
    public void collisionType2andType3(int count) {
@@ -163,8 +163,4 @@ public class SingleLinkedList {
 		   head = (Node) head.getLink();
 	   }
    }
-   
-   public void clear() {
-	    head = null;
-	}
 }
