@@ -136,8 +136,10 @@ public class SingleLinkedList {
 	   Node temp = head;
 	   
 	   while(temp != null) {
-		   SnakeElement bodyPart = (SnakeElement) temp.getData();		
-		   bodyPart.setElement(' ');
+		   SnakeElement bodyPart = (SnakeElement) temp.getData();
+		   int x = bodyPart.getX(), y = bodyPart.getY();
+		   GameField.map[x][y] = ' ';
+		   bodyPart.setElement(' '); bodyPart.setX(' '); bodyPart.setY(' ');
 		   temp = (Node) temp.getLink();
 	   }
 	   
