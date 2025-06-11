@@ -101,8 +101,10 @@ public class Snake {
 	   GameField.map[newSx][newSy] == '3') {
 		int sX = 0, sY = 0, count = 0;
 		boolean flag = false;
-		for(int i = 0; i < Game.snakes.size(); i++) {
-			Snake snake = (Snake) Game.snakes.peek();
+		int size = Game.snakes.size();
+		Snake snake = null;
+		for(int i = 0; i < size; i++) {
+			snake = (Snake) Game.snakes.peek();
 			Node temp = snake.bodyParts.getHead();
 			count = 0;
 			while(temp != null) {
@@ -122,27 +124,21 @@ public class Snake {
 			Game.snakes.enqueue(Game.snakes.dequeue());
 		}
 		
+		for(int i = 0; i < size - count; i++) {
+			Game.snakes.enqueue(Game.snakes.dequeue());
+		}
+		
 		if(flag) {
-			Snake snake = (Snake) Game.snakes.peek();
 			if(GameField.map[newSx][newSy] == '1') {
-				if(snake.bodyParts.size() > 1) {
-					snake.bodyParts.deleteFirst();
-					snake.bodyParts.collisionType1(snake.bodyParts, count);
+				if(bodyParts.size() > 1) {
+					bodyParts.deleteFirst();
+					snake.bodyParts.collisionType1(bodyParts, count);
 				}
-				for(int i = 0; i < Game.snakes.size(); i++) {
-					SnakeElement element = (SnakeElement) Game.snakes.peek().bodyParts.getHead().getData();
-					sX = element.getX();   sY = element.getY();
-					
-					if(sX == x && sY == y) {
-						snake.bodyParts.clear();
-						Game.snakes.dequeue();
-						break;
-					}
-					Game.snakes.enqueue(Game.snakes.dequeue());
-				}
+				
+				die();
 			} else {
 				snake.bodyParts.collisionType2andType3(count);
-				snake.reverseSnake();
+				reverseSnake();
 			}
 		} else {
 			eat(newSx, newSy);	
@@ -321,18 +317,22 @@ public boolean isTail(int newSx, int newSy) { // checks tail
 	return false;
 }
 
-public boolean checkTrap() { // checks for trap in 3 * 3 area	
+public boolean isCrashedTrap() { // checks for trap in 3 * 3 area	
 	
-	SnakeElement head = (SnakeElement) bodyParts.getHead().getData();
-	int x = head.getX();
-	int y = head.getY();
-	
-	for(int i = -1; i <= 1; i++) {
-		for(int j = -1; j <= 1; j++) {			
-			if(GameField.map[x + i][y + j] == '=') 
-				return true;								
+	Node temp = bodyParts.getHead();
+	while(temp != null) {
+		SnakeElement element = (SnakeElement) temp.getData();
+		int x = element.getX(), y = element.getY();
+		
+		for(int i = -1; i <= 1; i++) {
+			for(int j = -1; j <= 1; j++) {			
+				if(GameField.map[x + i][y + j] == '=') 
+					return true;								
+			}	
 		}	
-	}		
+		temp = (Node) temp.getLink();
+	}
+	
 	return false;		
 }
 
@@ -340,6 +340,7 @@ public boolean checkTrap() { // checks for trap in 3 * 3 area
 	alive = false;	
 	bodyParts.deleteAll();	
 	deleteSnakeOnMap();
+	Game.snakeCounter--;
   }
   
  public boolean isAlive() {
