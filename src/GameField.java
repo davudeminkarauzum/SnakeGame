@@ -6,8 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
 
-import enigma.core.Enigma;
-
 public class GameField {
 	
     InputQueue inputQueue = new InputQueue();
@@ -15,8 +13,6 @@ public class GameField {
     public static char[][] map = new char[23][80]; //We added parameters in next to the map to y-axis
     public static enigma.console.Console cn;
     
-    // private static Game mainGameReference;
-
     public GameField(enigma.console.Console console)
     {
         cn = console;
@@ -81,6 +77,10 @@ public class GameField {
     public boolean isCrashedRobotsOrActiveTrap(int x, int y) {
     	return map[x][y] == 'C' || Snake.isCrashedSnake(x, y) || map[x][y] == '=';
     }
+    
+    public static boolean isTreasure(int x, int y) {
+    	return (map[x][y] == '1' || map[x][y] == '2' || map[x][y] == '3') && !Snake.isCrashedSnake(x, y);
+    }
      
     public void unloadInputQueue() {
         Random random = new Random();
@@ -99,6 +99,7 @@ public class GameField {
                 
                 if (c == 'S'){
                     Snake snake = new Snake(x,y);
+                    Game.snakeCounter++;
                     Game.snakes.enqueue(snake);
                 }
 
