@@ -25,6 +25,7 @@ public class Game {
 
     // Creating necessary variables
     int time, energy, life, trap, gametiming, trapcounter;
+	static int snakeCounter;
 
     // Variables for player and C robot
     boolean playersMove, computersMove;
@@ -78,6 +79,7 @@ public class Game {
                     GameField gameField = new GameField(cn);
                     gametiming = 0;
                     trapcounter = 0;
+                    snakeCounter = 0;
                     time = 0;
                     energy = 500;
                     life = 1000;
@@ -152,17 +154,17 @@ public class Game {
 
                                     int lastmove = 4;
 
-                                    if (tempkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1)
-                                            && !gameField.isCrashedRobotsOrActiveTrap(px, py - 1)) {
+                                    if (tempkey == KeyEvent.VK_RIGHT && !(gameField.isWall(px, py + 1)
+                                           || !gameField.isCrashedRobotsOrActiveTrap(px, py - 1))) {
                                         randomy = 1;
-                                    } else if (tempkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1)
-                                            && !gameField.isCrashedRobotsOrActiveTrap(px, py + 1)) {
+                                    } else if (tempkey == KeyEvent.VK_LEFT && !(gameField.isWall(px, py - 1)
+                                    		|| gameField.isCrashedRobotsOrActiveTrap(px, py + 1))) {
                                         randomy = -1;
-                                    } else if (tempkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py)
-                                            && !gameField.isCrashedRobotsOrActiveTrap(px - 1, py)) {
+                                    } else if (tempkey == KeyEvent.VK_UP && !(gameField.isWall(px - 1, py)
+                                    		|| gameField.isCrashedRobotsOrActiveTrap(px - 1, py))) {
                                         randomx = -1;
-                                    } else if (tempkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py)
-                                            && !gameField.isCrashedRobotsOrActiveTrap(px + 1, py)) {
+                                    } else if (tempkey == KeyEvent.VK_DOWN && !(gameField.isWall(px + 1, py)
+                                    		|| gameField.isCrashedRobotsOrActiveTrap(px + 1, py))) {
                                         randomx = 1;
                                     } else {
 
@@ -194,8 +196,7 @@ public class Game {
                                                 || gameField.isCrashedRobotsOrActiveTrap(px + randomx, py + randomy));
                                     }
 
-                                    int oldPx = px;
-                                    int oldPy = py;
+                                    int oldPx = px,  oldPy = py;
 
                                     collectTreasures(px + randomx, py + randomy);
                                     move(px + randomx, py + randomy);
@@ -276,37 +277,39 @@ public class Game {
                     	
                     } 
                     
-                    if (gametiming % 20 == 0) // 2 saniyede bir input Queue'dan eleman yerleştirilmesi
+                    if (gametiming % 20 == 0) // 2 second
                         gameField.unloadInputQueue();
 
-                    if (gametiming % 10 == 0) // her saniyede time değişkeninin arttırılması
+                    if (gametiming % 10 == 0) { // 1 second
                         time++;
+                    }
                     
-                    if(gametiming % 1 == 0) { //Neighbor square harming for player in every 0.1 second
+                    if(gametiming % 1 == 0) { //Neighbor square harming for player per 0.1 second
                         if (GameField.map[px + 1][py] == 'C' || GameField.map[px - 1][py] == 'C'
-                                || GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C')
-                            life -= 30;
-                        else if (Snake.snakeNeighborCount(px, py) > 0)
-                            life -= Snake.snakeNeighborCount(px, py);
-
-                        for (int t = 0; t < trapcounter; t++) {
-                            if (traps[t].getTime() != -1) {
-                                if (gametiming - traps[t].getTime() >= 100)
-                                    traps[t].boom();
-
-                                else {
-                                    for (int i = 0; i < snakes.size(); i++) {
-                                        Snake s = snakes.peek();
-                                        if (traps[t].checkSnake() && s.checkTrap() && s.isAlive()) {
-                                            traps[t].boom();
-                                            s.die();
-                                            playerscore += 200;
-                                            energy += 500;
-                                        }
-                                        snakes.enqueue(snakes.dequeue());
-                                    }
+                                || GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C') {
+                        	life -= 30;
+                        }
+                        else if (Snake.snakeNeighborCount(px, py) > 0) {
+                        	life -= Snake.snakeNeighborCount(px, py);
+                        }
+                    }
+                    
+                    for (int t = 0; t < trapcounter; t++) {
+                        if (gametiming - traps[t].getTime() >= 100 && traps[t].getTime() != -1) {
+                        	int size = snakes.size();
+                            for (int i = 0; i < size; i++) {
+                                Snake s = snakes.peek();
+                                if (s.isAlive()) {
+                                	if(s.isCrashedTrap()) {
+                                        s.die();
+                                        playerscore += 200;
+                                        energy += 500;
+                                	}
                                 }
+                                snakes.enqueue(snakes.dequeue());
                             }
+                            traps[t].boom();
+                            traps[t].setTime(-1);
                         }
                     }
 
@@ -412,7 +415,8 @@ public class Game {
                 for (int i = 0; i < 4; i++) {
                     int nx = x + directions[i][0], ny = y + directions[i][1];
 
-                    if (!visited[nx][ny] && map[nx][ny] != '#' && map[nx][ny] != 'P' && !Snake.isCrashedSnake(nx, ny)) {
+                    if (!(visited[nx][ny] || map[nx][ny] == '#' || map[nx][ny] == 'P' 
+                    		|| Snake.isCrashedSnake(nx, ny) || map[nx][ny] == '=')) {
                         currentLevelStack.push(new int[]{nx, ny});
                         visited[nx][ny] = true;
                         neighbor[nx][ny][0] = x;
@@ -478,7 +482,7 @@ public class Game {
         String lifeText = "" + life;
         String trapText = "" + trap;
         String playerscoreText = "" + playerscore;
-        String sRobotText = "" + snakes.size();
+        String sRobotText = "" + snakeCounter;
         String computerscoreText = "" + computerscore;
 
         writeToMap(5, 66, timeText);
