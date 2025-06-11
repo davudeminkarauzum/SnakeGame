@@ -35,35 +35,14 @@ public class Trap {
 		this.time = time;
 	}
 	
-	
-	public boolean checkSnake() {
-		
-		boolean control = false;
-		
+
+	public void boom() {
 		for(int i = -1; i <= 1; i++) {
 			for(int j = -1; j <= 1; j++) {
-				
-				if(GameField.map[x + i][y + j] == 'S') 
-					control = true;								
+				if(!(GameField.map[x + i][y + j] == '#' || GameField.map[x + i][y + j] == 'P'
+					|| GameField.map[x + i][y + j] == 'C' || GameField.isTreasure(x + i, y + j)))
+				GameField.map[x + i][y + j] = ' '; 
 			}	
-		}
-		
-		return control;
-		
-	}
-	
-	public void boom() {
-		
-		if(checkSnake()) {
-			
-			for(int i = -1; i <= 1; i++) {
-				for(int j = -1; j <= 1; j++) {
-					
-					if(GameField.map[x + i][y + j] != '#' && GameField.map[x + i][y + j] != 'P')
-					GameField.map[x + i][y + j] = 'x'; 
-				}	
-			}
-			
 		}
 	}
 	
