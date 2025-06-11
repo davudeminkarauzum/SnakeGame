@@ -78,8 +78,8 @@ public class GameField {
         return map[x][y] == '#';
     }
 
-    public boolean isCrashedRobots(int x, int y) {
-    	return map[x][y] == 'C' || Snake.isCrashedSnake(x, y);
+    public boolean isCrashedRobotsOrActiveTrap(int x, int y) {
+    	return map[x][y] == 'C' || Snake.isCrashedSnake(x, y) || map[x][y] == '=';
     }
      
     public void unloadInputQueue() {
