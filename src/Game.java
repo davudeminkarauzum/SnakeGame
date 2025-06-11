@@ -120,25 +120,25 @@ public class Game {
                             playersMove = true;
 
                             if (rkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1)
-                                    && !gameField.isCrashedRobots(px, py - 1)) {
+                                    && !gameField.isCrashedRobotsOrActiveTrap(px, py - 1)) {
                                 collectTreasures(px, py - 1);
                                 move(px, py - 1);
                                 tempkey = rkey;
                             }
                             if (rkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1)
-                                    && !gameField.isCrashedRobots(px, py + 1)) {
+                                    && !gameField.isCrashedRobotsOrActiveTrap(px, py + 1)) {
                                 collectTreasures(px, py + 1);
                                 move(px, py + 1);
                                 tempkey = rkey;
                             }
                             if (rkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py)
-                                    && !gameField.isCrashedRobots(px - 1, py)) {
+                                    && !gameField.isCrashedRobotsOrActiveTrap(px - 1, py)) {
                                 collectTreasures(px - 1, py);
                                 move(px - 1, py);
                                 tempkey = rkey;
                             }
                             if (rkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py)
-                                    && !gameField.isCrashedRobots(px + 1, py)) {
+                                    && !gameField.isCrashedRobotsOrActiveTrap(px + 1, py)) {
                                 collectTreasures(px + 1, py);
                                 move(px + 1, py);
                                 tempkey = rkey;
@@ -153,16 +153,16 @@ public class Game {
                                     int lastmove = 4;
 
                                     if (tempkey == KeyEvent.VK_RIGHT && !gameField.isWall(px, py + 1)
-                                            && !gameField.isCrashedRobots(px, py - 1)) {
+                                            && !gameField.isCrashedRobotsOrActiveTrap(px, py - 1)) {
                                         randomy = 1;
                                     } else if (tempkey == KeyEvent.VK_LEFT && !gameField.isWall(px, py - 1)
-                                            && !gameField.isCrashedRobots(px, py + 1)) {
+                                            && !gameField.isCrashedRobotsOrActiveTrap(px, py + 1)) {
                                         randomy = -1;
                                     } else if (tempkey == KeyEvent.VK_UP && !gameField.isWall(px - 1, py)
-                                            && !gameField.isCrashedRobots(px - 1, py)) {
+                                            && !gameField.isCrashedRobotsOrActiveTrap(px - 1, py)) {
                                         randomx = -1;
                                     } else if (tempkey == KeyEvent.VK_DOWN && !gameField.isWall(px + 1, py)
-                                            && !gameField.isCrashedRobots(px + 1, py)) {
+                                            && !gameField.isCrashedRobotsOrActiveTrap(px + 1, py)) {
                                         randomx = 1;
                                     } else {
 
@@ -191,7 +191,7 @@ public class Game {
                                                 }
                                             }
                                         } while (gameField.isWall(px + randomx, py + randomy)
-                                                || gameField.isCrashedRobots(px + randomx, py + randomy));
+                                                || gameField.isCrashedRobotsOrActiveTrap(px + randomx, py + randomy));
                                     }
 
                                     int oldPx = px;
@@ -213,8 +213,9 @@ public class Game {
 
                     if (gametiming % 4 == 0) { // Both robots movement (0.4 second)
                     	
+                    	int size = snakes.size();
                         // S robot movements
-                        for (int k = 0; k < snakes.size(); k++) {
+                        for (int k = 0; k < size; k++) {
                             Snake s = snakes.peek();
                             if (s.isAlive()) {
                                 s.snakeMovement();
@@ -226,16 +227,20 @@ public class Game {
                         computersMove = true;
                         if (!pathfinding.isEmpty()) {
                             String way = (String) pathfinding.peek();
-                            if (way.equals("R") && !(Snake.isCrashedSnake(cx, cy + 1) || GameField.map[cx][cy + 1] == 'P')) {
+                            if (way.equals("R") && !(Snake.isCrashedSnake(cx, cy + 1) || GameField.map[cx][cy + 1] == 'P'
+                            		|| GameField.map[cx][cy + 1] == '=')) {
                                 collectTreasures(cx, cy + 1);
                                 move(cx, cy + 1);
-                            } else if (way.equals("D") && !(Snake.isCrashedSnake(cx + 1, cy) || GameField.map[cx + 1][cy] == 'P')) {
+                            } else if (way.equals("D") && !(Snake.isCrashedSnake(cx + 1, cy) || GameField.map[cx + 1][cy] == 'P')
+                            		|| GameField.map[cx + 1][cy] == '=') {
                                 collectTreasures(cx + 1, cy);
                                 move(cx + 1, cy);
-                            } else if (way.equals("L") && !(Snake.isCrashedSnake(cx, cy - 1) || GameField.map[cx][cy - 1] == 'P')) {
+                            } else if (way.equals("L") && !(Snake.isCrashedSnake(cx, cy - 1) || GameField.map[cx][cy - 1] == 'P')
+                            		|| GameField.map[cx][cy - 1] == '=') {
                                 collectTreasures(cx, cy - 1);
                                 move(cx, cy - 1);
-                            } else if (way.equals("U") && !(Snake.isCrashedSnake(cx - 1, cy) || GameField.map[cx - 1][cy] == 'P')) {
+                            } else if (way.equals("U") && !(Snake.isCrashedSnake(cx - 1, cy) || GameField.map[cx - 1][cy] == 'P')
+                            		|| GameField.map[cx - 1][cy] == '=') {
                                 collectTreasures(cx - 1, cy);
                                 move(cx - 1, cy);
                             }
@@ -266,6 +271,9 @@ public class Game {
                             }
                             pathfinding = pathfinding(tempMap, cx, cy, targetedCX, targetedCY);
                         }
+                        
+                        drawComputerPath(cx, cy);
+                    	
                     } 
                     
                     if (gametiming % 20 == 0) // 2 saniyede bir input Queue'dan eleman yerleştirilmesi
@@ -273,28 +281,30 @@ public class Game {
 
                     if (gametiming % 10 == 0) // her saniyede time değişkeninin arttırılması
                         time++;
+                    
+                    if(gametiming % 1 == 0) { //Neighbor square harming for player in every 0.1 second
+                        if (GameField.map[px + 1][py] == 'C' || GameField.map[px - 1][py] == 'C'
+                                || GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C')
+                            life -= 30;
+                        else if (Snake.snakeNeighborCount(px, py) > 0)
+                            life -= Snake.snakeNeighborCount(px, py);
 
-                    if (GameField.map[px + 1][py] == 'C' || GameField.map[px - 1][py] == 'C'
-                            || GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C')
-                        life -= 30;
-                    else if (Snake.snakeNeighborCount(px, py) > 0)
-                        life += -1*Snake.snakeNeighborCount(px, py);
+                        for (int t = 0; t < trapcounter; t++) {
+                            if (traps[t].getTime() != -1) {
+                                if (gametiming - traps[t].getTime() >= 100)
+                                    traps[t].boom();
 
-                    for (int t = 0; t < trapcounter; t++) {
-                        if (traps[t].getTime() != -1) {
-                            if (gametiming - traps[t].getTime() >= 100)
-                                traps[t].boom();
-
-                            else {
-                                for (int i = 0; i < snakes.size(); i++) {
-                                    Snake s = snakes.peek();
-                                    if (traps[t].checkSnake() && s.checkTrap() && s.isAlive()) {
-                                        traps[t].boom();
-                                        s.die();
-                                        playerscore += 200;
-                                        energy += 500;
+                                else {
+                                    for (int i = 0; i < snakes.size(); i++) {
+                                        Snake s = snakes.peek();
+                                        if (traps[t].checkSnake() && s.checkTrap() && s.isAlive()) {
+                                            traps[t].boom();
+                                            s.die();
+                                            playerscore += 200;
+                                            energy += 500;
+                                        }
+                                        snakes.enqueue(snakes.dequeue());
                                     }
-                                    snakes.enqueue(snakes.dequeue());
                                 }
                             }
                         }
@@ -343,7 +353,7 @@ public class Game {
                     e.printStackTrace();
                 }
                 
-                time = 10;
+                time = 15;
                 while(time > 0) {
                 	cn.getTextWindow().setCursorPosition(25, 5 + highScoreList.size());
                 	System.out.println("You will return the menu " + time + " second later..");
@@ -432,11 +442,33 @@ public class Game {
 
             targetedX = tempX;
             targetedY = tempY;
-            if (GameField.map[targetedX][targetedY] == ' ')
-                GameField.map[targetedX][targetedY] = '.';
         }
 
         return result;
+    }
+    
+    public void drawComputerPath(int x, int y) {
+        Stack temp = new Stack(pathfinding.size());
+        while (!pathfinding.isEmpty()) {
+            String way = (String) pathfinding.peek();
+            if (way.equals("R")) {
+            	y++;
+            } else if (way.equals("D")) {
+                x++;
+            } else if (way.equals("L")) {
+                y--;
+            } else if (way.equals("U")) {
+            	x--;
+            }
+            
+            if(GameField.map[x][y] == ' ') {
+            	GameField.map[x][y] = '.';
+            }
+            temp.push(pathfinding.pop());
+        }
+        while(!temp.isEmpty()) {
+        	pathfinding.push(temp.pop());
+        }
     }
 
     void updateStatusPanel() { // skor değerlerinin güncellenip ekrana yazdırılması
