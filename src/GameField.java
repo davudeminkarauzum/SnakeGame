@@ -81,7 +81,8 @@ public class GameField {
     public static boolean isTreasure(int x, int y) {
     	return (map[x][y] == '1' || map[x][y] == '2' || map[x][y] == '3') && !Snake.isCrashedSnake(x, y);
     }
-     
+    
+
     public void unloadInputQueue() {
         Random random = new Random();
         boolean isInserted = false;
