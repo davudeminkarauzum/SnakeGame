@@ -12,7 +12,7 @@ import enigma.core.Enigma;
 
 public class Game {
     String choice;
-    enigma.console.Console cn = Enigma.getConsole("Snake Game", 100, 20, 20);
+    enigma.console.Console cn = Enigma.getConsole("Snake Game", 100, 30, 20);
 
     private Scanner scanner;
     static Random random = new Random();
@@ -117,9 +117,7 @@ public class Game {
                 trapcounter = 0;
                 snakeCounter = 0;
                 time = 0;
-                energy = 500;
-                life = 1000;
-                trap = 0;
+                
 
                 playersMove = false;
                 computersMove = false;
