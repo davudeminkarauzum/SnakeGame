@@ -12,7 +12,7 @@ import enigma.core.Enigma;
 
 public class Game {
     String choice;
-    static enigma.console.Console cn = Enigma.getConsole("Snake Game", 100, 20, 20);
+    enigma.console.Console cn = Enigma.getConsole("Snake Game", 100, 20, 20);
 
     private Scanner scanner;
     static Random random = new Random();
@@ -33,7 +33,7 @@ public class Game {
     Stack pathfinding = new Stack(500);
 
     Trap[] traps;
-    public static Snake_Que snakes;;
+    public static Snake_Que snakes;
 
     public Game() throws Exception {
 
@@ -217,11 +217,11 @@ public class Game {
                     	int size = snakes.size();
                         // S robot movements
                         for (int k = 0; k < size; k++) {
-                            Snake s = snakes.peek();
+                            Snake s = snakes.dequeue();
                             if (s.isAlive()) {
                                 s.snakeMovement(s);
                             }
-                            snakes.enqueue(snakes.dequeue());
+                            snakes.enqueue(s);
                         }
 
                         // C robot movements
@@ -289,32 +289,37 @@ public class Game {
                         }
                     }
                     
-                    for (int t = 0; t < trapcounter; t++) {
-                        if (gametiming - traps[t].getTime() > 100 && traps[t].getTime() != -1) {
-                        	int size = snakes.size();
-                            for (int i = 0; i < size; i++) {
-                                Snake s = snakes.peek();
-                                if (s.isAlive()) {
-                                	if(s.isCrashedTrap()) {
-                                        s.die();
-                                        playerscore += 200;
-                                        energy += 500;
-                                	}
-                                }
-                                snakes.enqueue(snakes.dequeue());
-                            }
-                            traps[t].boom();
-                            traps[t].setTime(-1);
+                	int size = snakes.size();
+                    for (int i = 0; i < size; i++) {
+                        Snake s = snakes.dequeue();
+                        for (int t = 0; t < trapcounter; t++) {
+                        	if(traps[t].getTime() != -1) {
+                            	if (gametiming - traps[t].getTime() <= 100) {
+                            		if(s.isAlive()) {
+                                    	if(s.isCrashedTrap()) {
+                                            s.die();
+                                            playerscore += 200;
+                                            energy += 500;
+                                            GameField.map[0][0] = '#';
+                                    	}
+                            		}
+                            	} else {
+                                    GameField.map[traps[t].getX()][traps[t].getY()] = ' ';
+                                    traps[t].setTime(-1);
+                            	}
+                        	}
                         }
+                        snakes.enqueue(s);
                     }
-
+                        
+                    
                     try {
                         Thread.sleep(100); // 1 time unit
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
 
-                    gametiming++; // 0.1 saniyede bir artar
+                    gametiming++; //increases per 0.1 second
                 }
 
                 clearScreen();
