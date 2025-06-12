@@ -34,10 +34,10 @@ public class Snake {
   public void snakeMovement(Snake snake) {
 	  
 	  SnakeElement snakeHead = (SnakeElement) bodyParts.getHead().getData();
-	  if(!isCrashedSnakeToSnake(snakeHead)) {
-		  int x = snakeHead.getX(), y = snakeHead.getY();
-		
-		  if(GameField.map[targetedX][targetedY] == ' ')
+	  int x = snakeHead.getX(), y = snakeHead.getY();
+	  if(!isCrashedSnakeToSnake(x, y)) {
+			
+		  if(!GameField.isTreasure(x, y))
 			  findTreasure();
 			
 	      if(stuck()) {
@@ -185,15 +185,16 @@ public void eat(int newSx, int newSy) {
 public boolean stuck() {
 	
 	SnakeElement head = (SnakeElement) bodyParts.getHead().getData();
-	int x = head.getX();
-	int y = head.getY();
+	int x = head.getX(),  y = head.getY();
 	
 	int stuckCount = 0;
 	
 	for (int i = -1; i <= 1; i += 2) {
-	    if (GameField.map[x + i][y] == '#' || isTail(x + i, y) ) 
+	    if (GameField.map[x + i][y] == '#' || GameField.map[x + i][y] == 'P' || GameField.map[x + i][y] == 'C'
+	    	|| isCrashedSnake(x + i, y) || isTail(x + i, y)) 
 	    	stuckCount++;
-	    if (GameField.map[x][y + i] == '#' || isTail(x, y + i) ) 
+	    if (GameField.map[x][y + i] == '#' || GameField.map[x][y + i] == 'P' || GameField.map[x][y + i] == 'C'
+		    	|| isCrashedSnake(x, y + i) || isTail(x, y + i)) 
 	    	stuckCount++;
 	}
 	
@@ -294,8 +295,8 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
  }
  
  public static int snakeNeighborCount(int x, int y) {
-		int sX = 0, sY = 0, count = 0;
-		for(int i = 0; i < Game.snakes.size(); i++) {
+		int sX = 0, sY = 0, count = 0, size = Game.snakes.size();
+		for(int i = 0; i < size; i++) {
 			Node temp = Game.snakes.peek().bodyParts.getHead();
 			while(temp != null) {
 				SnakeElement element = (SnakeElement) temp.getData();
@@ -316,10 +317,10 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
  }
  
  public static boolean isCrashedSnake(int x, int y) {
-		int sX = 0, sY = 0;
+		int sX = 0, sY = 0, size = Game.snakes.size();
 		boolean flag = false;
-		for(int i = 0; i < Game.snakes.size(); i++) {
-			Snake s = Game.snakes.peek();
+		for(int i = 0; i < size; i++) {
+			Snake s = Game.snakes.dequeue();
 			if(s.isAlive()) {
 				Node temp = s.bodyParts.getHead();
 				while(temp != null) {
@@ -332,17 +333,17 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
 				}
 			}
 			
-			Game.snakes.enqueue(Game.snakes.dequeue());
+			Game.snakes.enqueue(s);
 		}
 		
 		return flag;
  }
  
- public boolean isCrashedSnakeToSnake(SnakeElement headS) {
+ public boolean isCrashedSnakeToSnake(int x, int y) {
  	boolean flag = false;
- 	int x = headS.getX(), y = headS.getY(), size = Game.snakes.size();
- 	for(int i = 0; i < Game.snakes.size(); i++) {
- 		Snake s = (Snake) Game.snakes.peek();
+ 	int size = Game.snakes.size();
+ 	for(int i = 0; i < size; i++) {
+ 		Snake s = (Snake) Game.snakes.dequeue();
  		if(s.isAlive() && !flag) {
 			Node temp = s.bodyParts.getHead();
 			while(temp != null) {             
@@ -356,20 +357,12 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
 				
 				temp = (Node) temp.getLink();
 			}
-			
-			if(flag) {
-				for(int j = 0; j < size - i; j++) {
-					Game.snakes.enqueue(Game.snakes.dequeue());
-				}
-				break;
-			}
-			
  		}
- 		Game.snakes.enqueue(Game.snakes.dequeue());
+ 		Game.snakes.enqueue(s);
  	}
  	
  	
- 	return false;
+ 	return flag;
  }
  
  public void collisions(Snake snake) {
@@ -377,8 +370,8 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
 	    boolean flag = false;
 	 	SnakeElement element = (SnakeElement) snake.bodyParts.getHead().getData();
 	 	int x = element.getX(), y = element.getY(), size = Game.snakes.size();
-	 	for(int i = 0; i < Game.snakes.size(); i++) {
-	 		Snake mainS = (Snake) Game.snakes.peek();
+	 	for(int i = 0; i < size; i++) {
+	 		Snake mainS = (Snake) Game.snakes.dequeue();
 	 		if(mainS.isAlive() && !flag) {
 	 			int count = 0;
 				Node temp = mainS.bodyParts.getHead();
@@ -417,17 +410,8 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
 					}
 					temp = (Node) temp.getLink();
 				}
-				
-					
-				if(flag) {
-					for(int j = 0; j < size - i; j++) {
-						Game.snakes.enqueue(Game.snakes.dequeue());
-					}
-					break;
-				}
-				
 	 		}
-	 		Game.snakes.enqueue(Game.snakes.dequeue());
+	 		Game.snakes.enqueue(mainS);
 	 	}
    }  
  }
