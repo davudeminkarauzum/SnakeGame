@@ -55,14 +55,25 @@ public class Game {
 
         while (true) {
             do {
-                cn.getTextWindow().setCursorPosition(25, 0);
+                cn.getTextWindow().setCursorPosition(5, 0);
+                cn.getTextWindow().output(" ____  _   _    _    _  _______    ____    _    __  __ _____ ");
+                cn.getTextWindow().setCursorPosition(5, 1);
+                cn.getTextWindow().output("/ ___|| \\ | |  / \\  | |/ / ____|  / ___|  / \\  |  \\/  | ____|");
+                cn.getTextWindow().setCursorPosition(5, 2);
+                cn.getTextWindow().output("\\___ \\|  \\| | / _ \\ | ' /|  _|   | |  _  / _ \\ | |\\/| |  _|  ");
+                cn.getTextWindow().setCursorPosition(5, 3);
+                cn.getTextWindow().output(" ___) | |\\  |/ ___ \\| . \\| |___  | |_| |/ ___ \\| |  | | |___ ");
+                cn.getTextWindow().setCursorPosition(5, 4);
+                cn.getTextWindow().output("|____/|_| \\_/_/   \\_\\_|\\_\\_____|  \\____/_/   \\_\\_|  |_|_____|");
+                cn.getTextWindow().setCursorPosition(25, 6);
                 cn.getTextWindow().output("Welcome to the snake game");
-                cn.getTextWindow().setCursorPosition(25, 1);
+                cn.getTextWindow().setCursorPosition(25, 7);
                 cn.getTextWindow().output("To start the game press number 1");
-                cn.getTextWindow().setCursorPosition(25, 2);
-                cn.getTextWindow().output("To exit the game press number 2\n");
+                cn.getTextWindow().setCursorPosition(25, 8);
+                cn.getTextWindow().output("To exit the game press number 2");
 
-                cn.getTextWindow().setCursorPosition(25, 3);
+
+                cn.getTextWindow().setCursorPosition(25, 9);
                 choice = scanner.nextLine();
                 if (!choice.equals("1") && !choice.equals("2")) {
                     cn.getTextWindow().setCursorPosition(25, 4);
