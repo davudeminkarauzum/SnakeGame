@@ -90,7 +90,7 @@ public class Snake {
 			    randomMoveCounter = 25;		
 		  }
 	  } else {
-		  collisions(snake);
+		  collisions();
 	  }
   }
 
@@ -352,7 +352,6 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
 				if((sX == x + 1 && sY == y) || (sX == x - 1 && sY == y)
 					|| (sX == x && sY == y + 1) || (sX == x && sY == y - 1)) {
 					flag = true;
-					break;
 				}
 				
 				temp = (Node) temp.getLink();
@@ -365,53 +364,68 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
  	return flag;
  }
  
- public void collisions(Snake snake) {
-	 snake.deleteSnakeOnMap();
+ public void collisions() {
+	    deleteSnakeOnMap();
+
+	    SnakeElement head = (SnakeElement) bodyParts.getHead().getData();
+	    int x = head.getX(), y = head.getY();
+
+	    Snake_Que tempQueue = new Snake_Que(100);
 	    boolean flag = false;
-	 	SnakeElement element = (SnakeElement) snake.bodyParts.getHead().getData();
-	 	int x = element.getX(), y = element.getY(), size = Game.snakes.size();
-	 	for(int i = 0; i < size; i++) {
-	 		Snake mainS = (Snake) Game.snakes.dequeue();
-	 		if(mainS.isAlive() && !flag) {
-	 			int count = 0;
-				Node temp = mainS.bodyParts.getHead();
-				while(temp != null) {
-					SnakeElement tempS = (SnakeElement) temp.getData();
-					int sX = tempS.getX(); int sY = tempS.getY();
-					if((sX == x + 1 && sY == y) || (sX == x - 1 && sY == y)
-						|| (sX == x && sY == y + 1) || (sX == x && sY == y - 1)) {
-						if(GameField.map[x][y] == 'S') {
-							mainS.die();
-							snake.die();
-						} else if(GameField.map[x][y] == '1') {
-							mainS.deleteSnakeOnMap();
-							if(snake.bodyParts.size() > 1) {
-								snake.bodyParts.deleteFirst();
-								mainS.bodyParts.collisionType1(snake.bodyParts, count);
-							}
-							snake.die();
-							mainS.displaySnakeOnMap();
-						} else {
-							mainS.deleteSnakeOnMap();
-							
-							mainS.bodyParts.collisionType2andType3(count);
-							snake.reverseSnake();
-							
-							mainS.displaySnakeOnMap();
-							snake.displaySnakeOnMap();
-						}
-						
-						flag = true;
-						break;
-				    }
-					
-					if(!flag) {
-						count++;
-					}
-					temp = (Node) temp.getLink();
-				}
-	 		}
-	 		Game.snakes.enqueue(mainS);
-	 	}
-   }  
+	    int size = Game.snakes.size();
+
+	    for (int i = 0; i < size; i++) {
+	        Snake snake = (Snake) Game.snakes.dequeue();
+	        tempQueue.enqueue(snake);
+
+	        // Eğer zaten çarpışma işlendi veya karşıdaki yılan ölü ya da bu kendimizse atla
+	        if (flag || !snake.isAlive() || snake == this)
+	            continue;
+
+	        Node temp = snake.bodyParts.getHead();
+	        int count = 0;
+
+	        while (temp != null) {
+	            SnakeElement element = (SnakeElement) temp.getData();
+	            int sX = element.getX(), sY = element.getY();
+
+	            // Yan yana pozisyon kontrolü
+	            if (((sX == x + 1 && sY == y) || (sX == x - 1 && sY == y)
+	                || (sX == x && sY == y + 1) || (sX == x && sY == y - 1))) {
+
+	                if (GameField.map[sX][sY] == 'S') {
+	                    this.die();
+	                    snake.die();
+	                } else if (GameField.map[sX][sY] == '1') {
+	                    snake.deleteSnakeOnMap();
+	                    if (bodyParts.size() > 1) {
+	                        bodyParts.deleteFirst();
+	                        snake.bodyParts.collisionType1(this.bodyParts, count);
+	                    }
+	                    this.die();
+	                    snake.displaySnakeOnMap();
+	                } else {
+	                    snake.deleteSnakeOnMap();
+	                    snake.bodyParts.collisionType2andType3(count);
+	                    this.reverseSnake();
+	                    snake.displaySnakeOnMap();
+	                    this.displaySnakeOnMap();
+	                }
+	                flag = true;
+	                break;
+	            }
+	            
+	            if(!flag) {
+	            	count++;
+	            }
+	            temp = (Node) temp.getLink();
+	        }
+	    }
+
+	    while(!tempQueue.isEmpty()) {
+	    	Game.snakes.enqueue(tempQueue.dequeue());
+	    }
+	    displaySnakeOnMap();
+	}
+
  }
