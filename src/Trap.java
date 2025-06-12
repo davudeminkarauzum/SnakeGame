@@ -34,21 +34,4 @@ public class Trap {
 	public void setTime(int time) {
 		this.time = time;
 	}
-	
-
-	public void boom() {
-		for(int i = -1; i <= 1; i++) {
-			for(int j = -1; j <= 1; j++) {
-				if(!(GameField.map[x + i][y + j] == '#' || GameField.map[x + i][y + j] == 'P'
-					|| GameField.map[x + i][y + j] == 'C' || GameField.isTreasure(x + i, y + j)))
-				GameField.map[x + i][y + j] = ' '; 
-			}	
-		}
-	}
-	
-	public void disappear() {
-		
-		GameField.map[x][y] = ' ';	
-		time = -1;
-	}
 }
