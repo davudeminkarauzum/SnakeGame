@@ -28,121 +28,80 @@ public class Snake {
       do {
           targetedX = random.nextInt(22) + 1;
           targetedY = random.nextInt(54) + 1;
-      } while (!(GameField.map[targetedX][targetedY] == '1' ||
-   		        GameField.map[targetedX][targetedY] == '2' ||
-    		    GameField.map[targetedX][targetedY] == '3'));	    
+      } while (!GameField.isTreasure(targetedX, targetedY));
   }
 
-  public void snakeMovement() {
+  public void snakeMovement(Snake snake) {
 	  
-	  SnakeElement snakeHead = (SnakeElement) bodyParts.getHead().getData();
-	  int x = snakeHead.getX(), y = snakeHead.getY();
-	
-	  if(GameField.map[targetedX][targetedY] == ' ')
-		  findTreasure();
+	  if(isCrashedSnakeToSnake(snake)) {
+		  
+	  } else {
+		  SnakeElement snakeHead = (SnakeElement) bodyParts.getHead().getData();
+		  int x = snakeHead.getX(), y = snakeHead.getY();
 		
-      if(stuck()) {
-		  if (bodyParts.getHead().getLink() != null) {
-		      reverseSnake();	
-		  } else {
-		      randomMove();				
+		  if(GameField.map[targetedX][targetedY] == ' ')
+			  findTreasure();
+			
+	      if(stuck()) {
+			  if (bodyParts.getHead().getLink() != null) {
+			      reverseSnake();	
+			  } else {
+			      randomMove();				
+			  }
+			  randomMoveCounter = 25;
 		  }
-		  randomMoveCounter = 25;
-	  }
-	
-      else if(randomMoveCounter > 0)
-			  randomMove();
 		
-	  else if(y > targetedY && !isTail(x, y - 1)) {
-		 
-		  if(!(GameField.map[x][y - 1] == '#' || GameField.map[x][y - 1] == 'P' 
-			|| GameField.map[x][y - 1] == 'C'|| isCrashedSnake(x, y - 1)))
-			  move(x, y - 1, x, y);	
+	      else if(randomMoveCounter > 0)
+				  randomMove();
+			
+		  else if(y > targetedY && !isTail(x, y - 1)) {
+			 
+			  if(!(GameField.map[x][y - 1] == '#' || GameField.map[x][y - 1] == 'P' 
+				|| GameField.map[x][y - 1] == 'C'))
+				  move(x, y - 1);	
 
-		  else 
-		    randomMoveCounter = 25;		
-	  }
-	
-      else if(y < targetedY && !isTail(x, y + 1)) {
-    	
-		  if(!(GameField.map[x][y + 1] == '#' || GameField.map[x][y + 1] == 'P' 
-			|| GameField.map[x][y + 1] == 'C'|| isCrashedSnake(x, y + 1)))
-			  move(x, y + 1, x, y);	
+			  else 
+			    randomMoveCounter = 25;		
+		  }
+		
+	      else if(y < targetedY && !isTail(x, y + 1)) {
+	    	
+			  if(!(GameField.map[x][y + 1] == '#' || GameField.map[x][y + 1] == 'P' 
+				|| GameField.map[x][y + 1] == 'C'))
+				  move(x, y + 1);	
 
-		  else 
-		    randomMoveCounter = 25;			
-	  }
-	
-	  else if(x > targetedX && !isTail(x - 1, y)) {
-		  if(!(GameField.map[x - 1][y] == '#' || GameField.map[x - 1][y] == 'P' 
-			|| GameField.map[x - 1][y] == 'C'|| isCrashedSnake(x - 1, y)))
-		 	  move(x - 1, y, x, y);	
+			  else 
+			    randomMoveCounter = 25;			
+		  }
+		
+		  else if(x > targetedX && !isTail(x - 1, y)) {
+			  if(!(GameField.map[x - 1][y] == '#' || GameField.map[x - 1][y] == 'P' 
+				|| GameField.map[x - 1][y] == 'C'))
+			 	  move(x - 1, y);	
 
-		  else 
-		    randomMoveCounter = 25;					
-	  }
-	
-	  else if(x < targetedX && !isTail(x + 1, y)) {
-		  if(!(GameField.map[x + 1][y] == '#' || GameField.map[x + 1][y] == 'P' 
-			|| GameField.map[x + 1][y] == 'C'|| isCrashedSnake(x + 1, y)))
-			  move(x + 1, y, x, y);	
+			  else 
+			    randomMoveCounter = 25;					
+		  }
+		
+		  else if(x < targetedX && !isTail(x + 1, y)) {
+			  if(!(GameField.map[x + 1][y] == '#' || GameField.map[x + 1][y] == 'P' 
+				|| GameField.map[x + 1][y] == 'C'))
+				  move(x + 1, y);	
 
-		  else 
-		    randomMoveCounter = 25;		
+			  else 
+			    randomMoveCounter = 25;		
+		  }
 	  }
   }
 
-  public void move(int newSx, int newSy, int x, int y) {
+  public void move(int newSx, int newSy) {
 	
 	deleteSnakeOnMap();
 	
-	if(GameField.map[newSx][newSy] == '1' ||
-	   GameField.map[newSx][newSy] == '2' ||
-	   GameField.map[newSx][newSy] == '3') {
-		int sX = 0, sY = 0, count = 0;
-		boolean flag = false;
-		int size = Game.snakes.size();
-		Snake snake = null;
-		for(int i = 0; i < size; i++) {
-			snake = (Snake) Game.snakes.peek();
-			Node temp = snake.bodyParts.getHead();
-			count = 0;
-			while(temp != null) {
-				SnakeElement element = (SnakeElement) temp.getData();
-				sX = element.getX();   sY = element.getY();
-				if(sX == newSx && sY == newSy) {
-					flag = true;
-					break;
-				}
-				count++;
-				temp = (Node) temp.getLink();
-			}
-			
-			if(flag) {
-				break;
-			}
-			Game.snakes.enqueue(Game.snakes.dequeue());
-		}
-		
-		for(int i = 0; i < size - count; i++) {
-			Game.snakes.enqueue(Game.snakes.dequeue());
-		}
-		
-		if(flag) {
-			if(GameField.map[newSx][newSy] == '1') {
-				if(bodyParts.size() > 1) {
-					bodyParts.deleteFirst();
-					snake.bodyParts.collisionType1(bodyParts, count);
-				}
-				
-				die();
-			} else {
-				snake.bodyParts.collisionType2andType3(count);
-				reverseSnake();
-			}
-		} else {
-			eat(newSx, newSy);	
-		}
+	if(GameField.map[newSx][newSy] == '1' 
+		|| GameField.map[newSx][newSy] == '2' 
+		|| GameField.map[newSx][newSy] == '3') {
+		eat(newSx, newSy);
 	} else {
 		if(bodyParts.getHead().getLink() == null) {
 			Node head = bodyParts.getHead();
@@ -206,7 +165,7 @@ public void randomMove() {
     		  || GameField.map[x + randomX][y + randomY] == 'P' || GameField.map[x + randomX][y + randomY] == 'C'
     		  || isCrashedSnake(x + randomX, y + randomY));
 	
-	  move(x + randomX, y + randomY, x, y);
+	  move(x + randomX, y + randomY);
 	  randomMoveCounter--;
 }
 
@@ -362,14 +321,17 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
 		int sX = 0, sY = 0;
 		boolean flag = false;
 		for(int i = 0; i < Game.snakes.size(); i++) {
-			Node temp = Game.snakes.peek().bodyParts.getHead();
-			while(temp != null) {
-				SnakeElement element = (SnakeElement) temp.getData();
-				sX = element.getX();   sY = element.getY();
-				if(sX == x && sY == y) {
-					flag = true;
+			Snake s = Game.snakes.peek();
+			if(s.isAlive()) {
+				Node temp = s.bodyParts.getHead();
+				while(temp != null) {
+					SnakeElement element = (SnakeElement) temp.getData();
+					sX = element.getX();   sY = element.getY();
+					if(sX == x && sY == y) {
+						flag = true;
+					}
+					temp = (Node) temp.getLink();
 				}
-				temp = (Node) temp.getLink();
 			}
 			
 			Game.snakes.enqueue(Game.snakes.dequeue());
@@ -377,5 +339,48 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
 		
 		return flag;
  }
-
+ 
+ public boolean isCrashedSnakeToSnake(Snake snake) {
+ 	boolean flag = false;
+ 	SnakeElement element = (SnakeElement) snake.bodyParts.getHead().getData();
+ 	int x = element.getX(), y = element.getY();
+ 	for(int i = 0; i < Game.snakes.size(); i++) {
+ 		Snake s = (Snake) Game.snakes.peek();
+ 		if(s.isAlive() && !flag) {
+ 			int count = 0;
+			Node temp = s.bodyParts.getHead();
+			while(temp != null) {
+				element = (SnakeElement) temp.getData();
+				int sX = element.getX(); int sY = element.getY();
+				if((sX == x + 1 && sY == y) || (sX == x - 1 && sY == y)
+					|| (sX == x && sY == y + 1) || (sX == x && sY == y - 1)) {
+					if(GameField.map[x][y] == 'S') {
+						die();
+						snake.die();
+					} else if(GameField.map[x][y] == '1') {
+						if(bodyParts.size() > 1) {
+							bodyParts.deleteFirst();
+							snake.bodyParts.collisionType1(bodyParts, count);
+						}
+						die();
+					} else {
+						snake.bodyParts.collisionType2andType3(count);
+						reverseSnake();
+					}
+					flag = true;
+				}
+				
+				if(!flag) {
+					count++;
+				}
+				temp = (Node) temp.getLink();
+			}
+			
+ 		}
+ 		Game.snakes.enqueue(Game.snakes.dequeue());
+ 	}
+ 	
+ 	return flag;
+ }
+ 
 }
