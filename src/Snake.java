@@ -98,9 +98,7 @@ public class Snake {
 	
 	deleteSnakeOnMap();
 	
-	if(GameField.map[newSx][newSy] == '1' 
-		|| GameField.map[newSx][newSy] == '2' 
-		|| GameField.map[newSx][newSy] == '3') {
+	if(GameField.isTreasure(newSx, newSy)) {
 		eat(newSx, newSy);
 	} else {
 		if(bodyParts.getHead().getLink() == null) {
@@ -375,6 +373,7 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
  }
  
  public void collisions(Snake snake) {
+	 snake.deleteSnakeOnMap();
 	    boolean flag = false;
 	 	SnakeElement element = (SnakeElement) snake.bodyParts.getHead().getData();
 	 	int x = element.getX(), y = element.getY(), size = Game.snakes.size();
@@ -392,14 +391,21 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
 							mainS.die();
 							snake.die();
 						} else if(GameField.map[x][y] == '1') {
+							mainS.deleteSnakeOnMap();
 							if(snake.bodyParts.size() > 1) {
 								snake.bodyParts.deleteFirst();
 								mainS.bodyParts.collisionType1(snake.bodyParts, count);
 							}
 							snake.die();
+							mainS.displaySnakeOnMap();
 						} else {
+							mainS.deleteSnakeOnMap();
+							
 							mainS.bodyParts.collisionType2andType3(count);
 							snake.reverseSnake();
+							
+							mainS.displaySnakeOnMap();
+							snake.displaySnakeOnMap();
 						}
 						
 						flag = true;
