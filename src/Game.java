@@ -219,7 +219,7 @@ public class Game {
                         for (int k = 0; k < size; k++) {
                             Snake s = snakes.peek();
                             if (s.isAlive()) {
-                                s.snakeMovement();
+                                s.snakeMovement(s);
                             }
                             snakes.enqueue(snakes.dequeue());
                         }
@@ -247,15 +247,11 @@ public class Game {
                             }
                         } 
                         
-                        if (!computersMove && (GameField.map[targetedCX][targetedCY] == '1' ||
-                                GameField.map[targetedCX][targetedCY] == '2' ||
-                                GameField.map[targetedCX][targetedCY] == '3' ||
-                                GameField.map[targetedCX][targetedCY] == '@')) {
+                        if (!computersMove && (GameField.isTreasure(targetedCX, targetedCY)
+                        		|| GameField.map[targetedCX][targetedCY] == '@')) {
                             pathfinding.pop();
                         } else {
-                            while (!(GameField.map[targetedCX][targetedCY] == '1' ||
-                                    GameField.map[targetedCX][targetedCY] == '2' ||
-                                    GameField.map[targetedCX][targetedCY] == '3' ||
+                            while (!(GameField.isTreasure(targetedCX, targetedCY) ||
                                     GameField.map[targetedCX][targetedCY] == '@')) {
                                 targetedCX = random.nextInt(22) + 1;
                                 targetedCY = random.nextInt(54) + 1;
@@ -272,9 +268,6 @@ public class Game {
                             }
                             pathfinding = pathfinding(tempMap, cx, cy, targetedCX, targetedCY);
                         }
-                        
-                        drawComputerPath(cx, cy);
-                    	
                     } 
                     
                     if (gametiming % 20 == 0) // 2 second
@@ -285,6 +278,8 @@ public class Game {
                     }
                     
                     if(gametiming % 1 == 0) { //Neighbor square harming for player per 0.1 second
+                    	drawComputerPath(cx, cy);
+                    	
                         if (GameField.map[px + 1][py] == 'C' || GameField.map[px - 1][py] == 'C'
                                 || GameField.map[px][py + 1] == 'C' || GameField.map[px][py - 1] == 'C') {
                         	life -= 30;
@@ -295,7 +290,7 @@ public class Game {
                     }
                     
                     for (int t = 0; t < trapcounter; t++) {
-                        if (gametiming - traps[t].getTime() >= 100 && traps[t].getTime() != -1) {
+                        if (gametiming - traps[t].getTime() > 100 && traps[t].getTime() != -1) {
                         	int size = snakes.size();
                             for (int i = 0; i < size; i++) {
                                 Snake s = snakes.peek();
