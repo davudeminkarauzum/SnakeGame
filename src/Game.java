@@ -12,7 +12,7 @@ import enigma.core.Enigma;
 
 public class Game {
     String choice;
-    enigma.console.Console cn = Enigma.getConsole("Snake Game", 100, 20, 20);
+    enigma.console.Console cn = Enigma.getConsole("Snake Game", 100, 30, 20);
 
     private Scanner scanner;
     static Random random = new Random();
@@ -92,7 +92,6 @@ public class Game {
                     level = scanner.nextLine();
                 } while (!level.equals("1") && !level.equals("2") && !level.equals("3"));
 
-                // DEĞERLERİ LEVEL’A GÖRE AYARLA
                 switch (level) {
                     case "1": // EASY
                         life = 2000;
