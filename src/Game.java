@@ -117,9 +117,7 @@ public class Game {
                 trapcounter = 0;
                 snakeCounter = 0;
                 time = 0;
-                energy = 500;
-                life = 1000;
-                trap = 0;
+                
 
                 playersMove = false;
                 computersMove = false;
