@@ -5,13 +5,13 @@ public class InputQueue {
     private int randVal;
     private CircularQueue queue = new CircularQueue(15);
 
-    InputQueue() {//başlangıçta queueyi random elementlerle dolduruyoruz
+    InputQueue() { // filling input queue before the game starts
         for (int i = 0; i < 15; i++) {
             addElement();
         }
     }
 
-    void addElement() {//1 ile 100 arası sayı belirleyip olasılıklara göre değerleri atıyoruz
+    void addElement() {
         randVal = rand.nextInt(100) + 1;
         if (randVal <= 50)
             queue.enqueue(1);
@@ -25,7 +25,7 @@ public class InputQueue {
             queue.enqueue("S");
     }
 
-    Object dequeueInput() { // önce elementi çekiyoruz sonra element ekliyoruz. böyle yaparsak inputQueue'yu 16 boyutluk açmamıza gerek kalmaz
+    Object dequeueInput() {
     	
     	Object a = queue.dequeue();
         addElement();
@@ -36,8 +36,7 @@ public class InputQueue {
         Object current;     
        for (int i = 0; i < 15; i++) { 
             current = queue.dequeue();
-           
-         // current öğesini char'a dönüştürüp haritaya ekliyoruz
+
             char c = current.toString().charAt(0);  
             GameField.map[2][56 + i] = c;  
             

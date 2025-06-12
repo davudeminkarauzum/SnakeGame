@@ -1,10 +1,12 @@
 public class Node {
+		
 	Object data;
 	Node link;
 	
 	public Node(Object data) {
 		this.data = data;
 		this.link = null;
+		
 	}
 	public Object getData() {
 		return data;
@@ -22,3 +24,5 @@ public class Node {
 		this.link = link;
 	}
 }
+
+

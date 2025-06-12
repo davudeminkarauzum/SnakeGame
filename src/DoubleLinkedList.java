@@ -1,3 +1,4 @@
+
 public class DoubleLinkedList {
 
 	private DoubleNode head, tail;
@@ -20,7 +21,7 @@ public class DoubleLinkedList {
 	
 	public void display() {
 		DoubleNode temp = head;
-		while(temp != null) {
+		for(int i = 0; i < size(); i++) {
 			System.out.println(temp.getData());
 			temp = temp.getNext();
 		}

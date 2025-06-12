@@ -370,7 +370,7 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
 	    SnakeElement head = (SnakeElement) bodyParts.getHead().getData();
 	    int x = head.getX(), y = head.getY();
 
-	    Snake_Que tempQueue = new Snake_Que(100);
+	    SnakeQueue tempQueue = new SnakeQueue(100);
 	    boolean flag = false;
 	    int size = Game.snakes.size();
 
@@ -378,7 +378,6 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
 	        Snake snake = (Snake) Game.snakes.dequeue();
 	        tempQueue.enqueue(snake);
 
-	        // Eğer zaten çarpışma işlendi veya karşıdaki yılan ölü ya da bu kendimizse atla
 	        if (flag || !snake.isAlive() || snake == this)
 	            continue;
 
@@ -389,9 +388,8 @@ public boolean isCrashedTrap() { // checks for trap in 3 * 3 area
 	            SnakeElement element = (SnakeElement) temp.getData();
 	            int sX = element.getX(), sY = element.getY();
 
-	            // Yan yana pozisyon kontrolü
-	            if (((sX == x + 1 && sY == y) || (sX == x - 1 && sY == y)
-	                || (sX == x && sY == y + 1) || (sX == x && sY == y - 1))) {
+	            if ((sX == x + 1 && sY == y) || (sX == x - 1 && sY == y)
+	                || (sX == x && sY == y + 1) || (sX == x && sY == y - 1)) {
 
 	                if (GameField.map[sX][sY] == 'S') {
 	                    this.die();

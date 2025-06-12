@@ -12,7 +12,7 @@ import enigma.core.Enigma;
 
 public class Game {
     String choice;
-    enigma.console.Console cn = Enigma.getConsole("Snake Game", 100, 30, 20);
+    enigma.console.Console cn = Enigma.getConsole("Snake Game", 100, 20, 20);
 
     private Scanner scanner;
     static Random random = new Random();
@@ -33,7 +33,7 @@ public class Game {
     Stack pathfinding = new Stack(500);
 
     Trap[] traps;
-    public static Snake_Que snakes;
+    public static SnakeQueue snakes;
 
     public Game() throws Exception {
 
@@ -92,11 +92,12 @@ public class Game {
                     level = scanner.nextLine();
                 } while (!level.equals("1") && !level.equals("2") && !level.equals("3"));
 
+                // DEĞERLERİ LEVEL’A GÖRE AYARLA
                 switch (level) {
                     case "1": // EASY
                         life = 2000;
                         energy = 1000;
-                        trap = 7;
+                        trap = 10;
                         break;
                     case "2": // NORMAL
                         life = 1000;
@@ -105,7 +106,7 @@ public class Game {
                         break;
                     case "3": // HARD
                         life = 300;
-                        energy = 100;
+                        energy = 300;
                         trap = 0;
                         break;
                 }
@@ -116,7 +117,9 @@ public class Game {
                 trapcounter = 0;
                 snakeCounter = 0;
                 time = 0;
-                
+                energy = 500;
+                life = 1000;
+                trap = 0;
 
                 playersMove = false;
                 computersMove = false;
@@ -131,7 +134,7 @@ public class Game {
                 pathfinding = new Stack(500);
 
                 traps = new Trap[100];
-                snakes = new Snake_Que(100);
+                snakes = new SnakeQueue(100);
                 cn.getTextWindow().addKeyListener(klis);
 
                 while (!(GameField.map[px][py] == ' ' && GameField.map[cx][cy] == ' ')) {
@@ -147,14 +150,14 @@ public class Game {
                 GameField.map[px][py] = 'P';
                 GameField.map[cx][cy] = 'C';
 
-                for (int i = 0; i < 30; i++) // oyunun başında tahtaya input queue'dan 30 element boşalt
+                for (int i = 0; i < 30; i++) // loop for initial 30 element
                     gameField.unloadInputQueue();
 
                 while (life >= 0) { // main loop of the game
 
                     updateGameBoard();
 
-                    if (energy > 0 || gametiming % 2 == 0) { // 0.1 ya da 0.2 saniye
+                    if (energy > 0 || gametiming % 2 == 0) {
 
                         if (keypr == 1) {
 
@@ -354,12 +357,7 @@ public class Game {
                         snakes.enqueue(s);
                     }
 
-                    try {
-                        Thread.sleep(100); // 1 time unit
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
+                    Thread.sleep(100);
                     gametiming++; // increases per 0.1 second
                 }
 
@@ -405,11 +403,7 @@ public class Game {
                         time--;
                     }
 
-                    try {
-                        Thread.sleep(100); // 1 time unit
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    Thread.sleep(100); // 1 time unit
                     gametiming++;
                 }
                 clearScreen();
@@ -426,10 +420,10 @@ public class Game {
         }
     }
 
-    public void updateGameBoard() { // tahtayı güncelleyen fonksiyon
-        updateStatusPanel(); // değerlerin güncellenmesi
-        clearScreen(); // ekranın temizlenmesi
-        cn.getTextWindow().setCursorPosition(0, 0); // cursoru ayarla
+    public void updateGameBoard() { // updating board method
+        updateStatusPanel();
+        clearScreen();
+        cn.getTextWindow().setCursorPosition(0, 0);
         GameField.printScreen();
     }
 
@@ -516,8 +510,7 @@ public class Game {
         }
     }
 
-    void updateStatusPanel() { // skor değerlerinin güncellenip ekrana yazdırılması
-
+    void updateStatusPanel() { // printing necessary values to screen
         String timeText = "" + time;
         String energyText = "" + energy;
         String lifeText = "" + life;
@@ -535,7 +528,7 @@ public class Game {
         writeToMap(17, 66, computerscoreText);
     }
 
-    void writeToMap(int row, int col, String text) { // yardımcı fonksiyon
+    void writeToMap(int row, int col, String text) {
         for (int i = 0; i < text.length() + 3; i++) {
             GameField.map[row][col + i] = ' ';
         }
@@ -544,7 +537,7 @@ public class Game {
         }
     }
 
-    void collectTreasures(int newPx, int newPy) { // treasure yedikten sonra puanlarını ekleyen fonksiyon
+    void collectTreasures(int newPx, int newPy) { // method that adds point after eating treasure
 
         if (GameField.map[newPx][newPy] == '1') {
             if (playersMove) {
