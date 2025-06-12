@@ -57,6 +57,8 @@ public class GameField {
                         attrs = new TextAttributes(Color.BLACK, Color.WHITE); 
                     } else if(ch == '.') {
                     	attrs = new TextAttributes(Color.BLUE, Color.WHITE);
+                    } else if(isTreasure(i, j) || ch == '@'){
+                    	attrs = new TextAttributes(Color.RED, Color.WHITE);
                     } else {
                     	attrs = new TextAttributes(Color.BLACK, Color.WHITE);
                     }
@@ -104,7 +106,7 @@ public class GameField {
                     Game.snakes.enqueue(snake);
                 }
 
-                inputQueue.writeElements(); //Printing InputQueue after insterting this treasure
+                inputQueue.writeElements(); //Printing InputQueue after inserting this treasure
             } 
             
         }
