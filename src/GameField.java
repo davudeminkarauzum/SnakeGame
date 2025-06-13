@@ -57,7 +57,7 @@ public class GameField {
                         attrs = new TextAttributes(Color.BLACK, Color.WHITE); 
                     } else if(ch == '.') {
                     	attrs = new TextAttributes(Color.BLUE, Color.WHITE);
-                    } else if(isTreasure(i, j) || ch == '@'){
+                    } else if(Snake.isCrashedSnake(i, j)){
                     	attrs = new TextAttributes(Color.RED, Color.WHITE);
                     } else {
                     	attrs = new TextAttributes(Color.BLACK, Color.WHITE);
